@@ -124,7 +124,7 @@ function _start_firewall() {
 	###
 	# Add your rules in the file here
 	###
-	[[ -f "${BASEFOLDER}/conf/firewall.local" ]] && ( . "${BASEFOLDER}/conf/firewall.local" )
+	[[ -f "${BASEFOLDER}/conf/bfs.firewall.local" ]] && ( . "${BASEFOLDER}/conf/bfs.firewall.local" )
 	
 	###
 	# Log and reject the rest
