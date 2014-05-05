@@ -91,11 +91,6 @@ function _start_firewall() {
 	###
 	
 	${IPT} -A INPUT -m state --state INVALID -j ${DSTATS} -m comment --comment "Standard flags"
-	${IPT} -A INPUT -p udp -i ${PUBIF} --dport 137 -j ${DSTATS} -m comment --comment "SMB Protocol"
-	${IPT} -A INPUT -p udp -i ${PUBIF} --dport 138 -j ${DSTATS} -m comment --comment "SMB Protocol"
-	${IPT} -A INPUT -p udp -i ${PUBIF} --dport 67 -j ${DSTATS} -m comment --comment "DHCP"
-	${IPT} -A INPUT -p udp -i ${PUBIF} --dport 1900 -j ${DSTATS} -m comment --comment "Microsoft SSDP Enables discovery of UPnP devices"
-	${IPT} -A INPUT -d 224.0.0.0/255.255.255.0 -j ${DSTATS} -m comment --comment "Multicast" 
 	${IPT} -A INPUT -i ${PUBIF} -s ${IP} -j ${DSTATS} -m comment --comment "Package on public interface with source local IP"
 	
 	#ICMP Rules
