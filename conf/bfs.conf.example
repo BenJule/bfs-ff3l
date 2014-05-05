@@ -1,0 +1,81 @@
+#!/bin/bash
+
+###
+# Common variables, used by both BASH and PHP
+############################################################################################################
+
+# The public interface
+PUBIF="eth0" # Example: 'eth0' 'bond0'
+
+# The database. Use 'csv' or 'rrd'. Other values will likely break the code
+DB='rrd' # example 'both'
+
+# Database files
+CSV_SUFFIX='_traffic.csv' # example '.csv'
+RRD_SUFFIX='_traffic.rrd' # example '.rrd'
+
+# Folders - relative paths with leading slash
+DB_FOLDER='/db' # example: '/db'
+
+###
+# BASH - only variables
+############################################################################################################
+
+# Important! Use this string to identify for which rules the stats script should gather the data.
+STATS_COMMENT_PREFIX='STS' # The comment prefix, by which the stats are generated
+
+# The name of the chains
+LOG='LOGGING' # The logging chain
+STATS='STATS' # The statistics chain
+DSTATS='DSTATS' # The statistics chain for dropped packets
+
+# Binaries
+# Alternatively, you can give here the full path to the binary
+
+IPT=$(which iptables 2>/dev/null) # The iptablesy binary
+#IPT='/sbin/iptables'
+
+GREP=$(which grep 2>/dev/null) # The grep untility
+#GREP='/bin/grep'
+
+AWK=$(which awk 2>/dev/null) # The awk utility
+#AWK='/usr/bin/awk'
+
+DATE=$(which date 2>/dev/null) # The date utility
+#DATE='/bin/date'
+
+IPB=$(which ip 2>/dev/null) # The ip binary
+#IPB='/bin/ip'
+
+SED=$(which sed 2>/dev/null) # The sed binary
+#SED='/bin/sed'
+
+RRDT=$(which rrdtool 2>/dev/null) # The rrdtool binary
+#RRDT='/usr/bin/rrdtool'
+
+
+# Sanity checks
+[[ -z ${IPT} ]] && (echo "Couldn't find the 'iptables' binary. Current path is: ${PATH}"; exit 1)
+[[ -z ${GREP} ]] && (echo "Couldn't find the 'grep' binary. Current path is: ${PATH}"; exit 1)
+[[ -z ${AWK} ]] && (echo "Couldn't find the 'awk' binary. Current path is: ${PATH}"; exit 1)
+[[ -z ${DATE} ]] && (echo "Couldn't find the 'date' binary. Current path is: ${PATH}"; exit 1)
+[[ -z ${IPB} ]] && (echo "Couldn't find the 'ip' binary. Current path is: ${PATH}"; exit 1)
+[[ -z ${SED} ]] && (echo "Couldn't find the 'sed' binary. Current path is: ${PATH}"; exit 1)
+if [ "${DB}" = rrd ] || [ "${DB}" = both ]; then [[ -z ${RRDT} ]] && (echo "Couldn't find the 'rrdtool' binary. Current path is: ${PATH}"; exit 1); fi
+
+# Get the IP address of the public interface - needed for the firewall script
+IP=$(${IPB} -f inet addr show dev ${PUBIF} | ${SED} -n 's/^ *inet *\([.0-9]*\).*/\1/p' 2> /dev/null) # The public IP address
+#IP='1.2.3.4'
+
+# The timestamp for inserting the data
+TIMESTAMP=$(${DATE} +%s)
+
+# Sanity checks
+[[ -z ${IP} ]] && (echo "Couldn't calculate the IP address."; exit 1)
+[[ -z ${TIMESTAMP} ]] && (echo "Couldn't calculate the timestamp."; exit 1)
+
+###
+# Don't add anything below this line. The next variable is used to check that the config file was loaded
+# properly.
+############################################################################################################
+LOADEDOK='yes'
