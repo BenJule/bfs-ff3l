@@ -29,7 +29,7 @@ BASEFOLDER="$( cd -P "$( dirname "${SOURCE}" )/../" && pwd )"
 
 # Please don't change anything below this line
 #============================================================================
-CONFFILE=${BASEFOLDER}'/conf/bfs.core.conf'
+CONFFILE=${BASEFOLDER}'/conf/bfs.conf'
 
 function _load_config() {
 	if [ -f ${CONFFILE} ];
