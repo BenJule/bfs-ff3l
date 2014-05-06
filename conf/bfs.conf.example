@@ -7,15 +7,20 @@
 # The public interface
 PUBIF="eth0" # Example: 'eth0' 'bond0'
 
-# The database. Use 'csv' or 'rrd'. Other values will likely break the code
+# The database. Use 'csv', 'rrd' or 'both'. Other values will likely break the code or be ignored.
 DB='rrd' # example 'both'
 
 # Database files
 CSV_SUFFIX='_traffic.csv' # example '.csv'
 RRD_SUFFIX='_traffic.rrd' # example '.rrd'
 
-# Folders - relative paths with leading slash
-DB_FOLDER='/db' # example: '/db'
+# Folders - relative paths to the ${BASEFOLDER}
+DB_FOLDER='db' # example: 'db'
+
+###
+# PHP - only variables
+###
+MODAL='bfs.modal.php'
 
 ###
 # BASH - only variables

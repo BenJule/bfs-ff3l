@@ -43,6 +43,7 @@ class BitleaderFirewallStatistics {
 		'rrd_suffix' => false,
 		'db' => false,
 		'db_folder' => false,
+		'modal' => false,
 	);
 
 	/**
@@ -57,20 +58,24 @@ class BitleaderFirewallStatistics {
 	/**
 	 * Class constructor
 	 *
-	 * @param string $coreConf The configuration file for BFS
+	 * @param string $confFile The configuration file for BFS - normally ${BASEFOLDER}/conf/bfs.conf
 	 * @throws Exception If the config file doesn't exist or is unreadable
 	 */
-	public function __construct($coreConf = null) {
-		if ($coreConf) {
-			$confFile = __DIR__ . '/../conf/' . $coreConf;
-			if (file_exists($confFile) && (is_readable($confFile))) {
-				$this->coreConf = $coreConf;
+	public function __construct($confFile = null) {
+		if ($confFile) {
+			$fullPath = realpath(__DIR__ . '/../conf/' . $confFile);
+			if (file_exists($fullPath) && (is_readable($fullPath))) {
+				$this->coreConf = $fullPath;
 			}
 		}
-		$this->coreConf = __DIR__ . '/../conf/' . $this->coreConf;
+
+		//Rewrites the relative path to the core config file to an absolute path
+		$this->coreConf = realpath(__DIR__ . '/../conf/' . $this->coreConf);
 		if ((!file_exists($this->coreConf)) || (!is_readable($this->coreConf))) {
 			throw new Exception('Configuration file ' . $this->coreConf  . ' not found!');
 		}
+
+		//Now let's load the settings
 		$this->getSettings();
 	}
 
@@ -87,6 +92,13 @@ class BitleaderFirewallStatistics {
 				}
 			}
 		}
+
+		//maintain backwords compatibility for new configuration variables
+		$this->_makeCompatible();
+
+		//Fix file paths to be absolute
+		$this->config['modal'] = realpath(__DIR__ . '/../inc/' . $this->config['modal']);
+
 		foreach ($this->config AS $key => $config) {
 			if ($config === false) {
 				throw new Exception('Missing configuration value in ' . $this->coreConf . '. Please add "' . strtoupper($key) . '=your-value"');
@@ -94,6 +106,17 @@ class BitleaderFirewallStatistics {
 		}
 		//For tests only
 		//$this->config['db'] = 'csv';
+	}
+
+	/**
+	 * Maintaints backwards compatibility, in case new variables have been added
+	 *
+	 * Sets $this->config[newVariable] to a default value, if it hasn't been added to the config file.
+	 */
+	private function _makeCompatible() {
+		if (!$this->config['modal']) {
+			$this->config['modal'] = 'bfs.modal.php';
+		}
 	}
 
 	/**
