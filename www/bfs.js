@@ -151,13 +151,6 @@ var BFS = (function(a) {
 })(BFS || {});
 
 /**
- * Initializes the BFS
- */
-$(document).ready(function() {
-	BFS.init();
-});
-
-/**
  * The BFS Highcharts Plugin
  */
 BFS = (function(a, b) {
@@ -208,7 +201,7 @@ BFS = (function(a, b) {
 					type : $me.attr('data-type') || 'spline',
 					source : $me.attr('data-source') || 'json',
 					graphName : $me.attr('id'),
-					colors : $me.attr('data-colors') && ($me.attr('data-colors').split('|')) || ['#8bbc21', '#0D233A', '#2f7ed8', '#910000', '#1aadce', '#492970', '#f28f43', '#77a1e5', '#c42525', '#a6c96a'],
+					colors : $me.attr('data-colors') && ($me.attr('data-colors').split('|')) || ['#8bbc21', '#1aadce', '#FF551C', '#910000', '#0D233A', '#492970', '#f28f43', '#77a1e5', '#c42525', '#a6c96a'],
 					minRange : $me.attr('data-min-range') || 3600000,
 					height : $me.attr('data-height') || 200,
 					stacking : $me.attr('data-stacking') || null,
@@ -505,4 +498,11 @@ BFS = (function(a, b) {
 })(BFS || {
 	plugins : {}
 }, 'highcharts');
+
+/**
+ * Initializes the BFS
+ */
+$(document).ready(function() {
+	BFS.init();
+});
 
