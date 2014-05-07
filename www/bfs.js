@@ -1,7 +1,9 @@
 /**
- * Prevent console.log errors
+ * Sets some default functions
+ *
+ * Prevent console.log errors, enables Date.now
  */
-(function consoleDisabler() {
+(function fixer() {
 	var method;
 	var noop = function() {
 	};
@@ -18,6 +20,12 @@
 			console[method] = noop;
 		}
 	}
+
+	//Enables Date.now for older browsers
+	if (!Date.now) {
+		Date.now = function() { return new Date().getTime(); };
+	}
+
 }());
 
 /**
@@ -149,6 +157,9 @@ $(document).ready(function() {
 	BFS.init();
 });
 
+/**
+ * The BFS Highcharts Plugin
+ */
 BFS = (function(a, b) {
 	var z = a.plugins[b] = a.plugins[b] || {
 		v : {
@@ -202,8 +213,7 @@ BFS = (function(a, b) {
 					height : $me.attr('data-height') || 200,
 					stacking : $me.attr('data-stacking') || null,
 					legend : $me.attr('data-legend') || true,
-					title : $me.attr('data-title') || $me.find('h4').first().text() || $me.attr('id'),
-					summarizeName : false,
+					markers : $me.attr('data-markers') || false,
 					maxX : $me.attr('data-max-x') || null,
 					maxY : $me.attr('data-max-y') || null,
 					plotX : $me.attr('data-plot-x-line') || false,
@@ -212,7 +222,7 @@ BFS = (function(a, b) {
 					plotYTitle : $me.attr('data-plot-y-title') || null,
 					tooltipFormat : $me.attr('data-tooltip-format') || null,
 					tooltipConvert : $me.attr('data-tooltip-convert') || null,
-					reloadInterval : $me.attr('data-reload-interval') || Math.floor(Math.random() * (600 - 300 + 1) + 300), // see
+					reloadInterval : $me.attr('data-reload-interval') || Math.floor(Math.random() * (240 - 121) + 120), // see
 				// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
 					zoomType : $me.attr('data-zoom-type') || 'x',
 					yTitle : $me.attr('data-ytitle') || null,
@@ -242,7 +252,6 @@ BFS = (function(a, b) {
 					}
 				}]);
 
-				options.alias = $me.attr('data-alias') || null;
 				z.autoAddSeries(options);
 				z.v.scheduled || (z.v.scheduled = setInterval(function() {
 					z.reloadAllGraphs(z)
@@ -282,26 +291,31 @@ BFS = (function(a, b) {
 				enabled : options.legend
 			},
 			title : {
-				// floating : true,
+				//The title is desabled as we have the bootstrap panels with header
 				text : null
-			// options.title
 			},
 			plotOptions : {
+				line : {
+					marker : {
+						enabled : options.markers
+					},
+					stacking : options.stacking
+				},
 				area : {
 					marker : {
-						enabled : false
+						enabled : options.markers
 					},
 					stacking : options.stacking
 				},
 				series : {
 					marker : {
-						enabled : false
+						enabled : options.markers
 					},
 					stacking : options.stacking
 				},
 				spline : {
 					marker : {
-						enabled : false
+						enabled : options.markers
 					},
 					stacking : options.stacking
 				}
@@ -318,7 +332,7 @@ BFS = (function(a, b) {
 			yAxis : {
 				min : 0,
 				marker : {
-					enabled : false
+					enabled : options.markers
 				},
 				minorTickInterval : 'auto',
 				tickPixelInterval : 25,
@@ -334,7 +348,7 @@ BFS = (function(a, b) {
 				formatter : function() {
 					var s = '<span style="font-size: 10px">' + Highcharts.dateFormat('%H:%M:%S %e. %b %Y', this.x) + '</span><br/>';
 					$.each(this.points, function(i, point) {
-						var pointValue = a.convertSize(point.y, options.tooltipConvert);
+						var pointValue = options.tooltipConvert && (a.convertSize(point.y, options.tooltipConvert)) || point.y;
 						s += '<br/><span style="color:' + point.series.color + '">' + point.series.name + '</span>: ';
 						s += '<strong>' + pointValue + '</strong>';
 					});
@@ -342,11 +356,12 @@ BFS = (function(a, b) {
 				}
 			}
 		}
-		options.source === 'local' && (console.log(graphOptions));
+		//Calls the actual Highcharts Method
 		z.v.graphs[options.graphName] = {
 			graph : new Highcharts.Chart(graphOptions),
 			options : options
 		};
+		//Redraws the graph once it's loaded
 		z.v.graphs[options.graphName].graph.reflow();
 	}
 
@@ -415,10 +430,6 @@ BFS = (function(a, b) {
 		return data;
 	}
 
-	z.convertMbToB = function(value) {
-		return (value * 1024 * 1024);
-	}
-
 	/**
 	 * Creates the polling url
 	 * 
@@ -426,8 +437,12 @@ BFS = (function(a, b) {
 	 * @returns {String}
 	 */
 	z.getUrl = function(options) {
-		var url = z.v.jsonUrl ;
-		return url + '?' + options.urlAppend;
+		var url = z.v.jsonUrl + '?' + options.urlAppend;
+		var now = Math.round((Date.now() / 1000) - 1);
+		//For now, hardcoded to the last 12h
+		var start = now - (12 * 60 * 60);
+		url += '&start=' + start + "&end=" + now;
+		return url;
 	}
 
 	/**

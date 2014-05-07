@@ -22,6 +22,14 @@ if (isset($_REQUEST['type']) && in_array($_REQUEST['type'],$types)) {
 	$options['type'] = $_REQUEST['type'];
 }
 
+if (isset($_REQUEST['start']) && $bfs->isTimestamp($_REQUEST['start'])) {
+	$options['start'] = $_REQUEST['start'];
+}
+
+if (isset($_REQUEST['end']) && $bfs->isTimestamp($_REQUEST['end'])) {
+	$options['end'] = $_REQUEST['end'];
+}
+
 foreach ($files AS $file) {
 	$values[] = $bfs->getValues($file,$options);
 }

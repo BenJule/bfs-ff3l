@@ -330,4 +330,17 @@ class BitleaderFirewallStatistics {
 		}
 		return $return;
 	}
+
+	/**
+	 * Checks if a variable is a valid unix timestamp
+	 *
+	 * @link http://stackoverflow.com/a/2524761
+	 * @param string $value The value to be testet
+	 * @return bool true if valid timestamp
+	 */
+	public function isTimestamp($value) {
+		return ((string) (int) $value === $value)
+			&& ($value <= PHP_INT_MAX)
+			&& ($value >= ~PHP_INT_MAX);
+	}
 }

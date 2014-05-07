@@ -37,45 +37,38 @@ try {
 		<div class="container-fluid">
 			<div class="col-lg-12">
 				<div
-					class="panel panel-success load-highchart"
+					class="panel panel-danger load-highchart"
 					id="highchart-throughput"
 					data-source="json"
 					data-ytitle=""
-					data-title=""
-					data-colors="#000000|#F28F43|#FE123A|#910000|#0f667a|#8bbc21"
 					data-type="area"
 					data-stacking="percentage"
-					data-height="200"
 					data-tooltip-convert="B"
 					data-url="type=throughput"
 				>
 					<div class="panel-heading">
 						<h4 class="panel-title">Total Throughput
-							<small>(DB <?php echo $bfs->config['db'];?>: stacked statistics for <?php echo $bfs->config['pubif'];?>)</small>
+							<small>(area type / stacked / statistics for <?php echo $bfs->config['pubif'];?>)</small>
 						</h4>
 					</div>
 					<div class="panel-body"></div>
 				</div>
 			</div>
-			<div class="col-lg-6">
+			<div class="col-lg-12">
 				<div
 					class="panel panel-success load-highchart"
 					id="highchart-bytes"
 					data-source="json"
 					data-ytitle=""
 					data-alias="total"
-					data-colors="#000000|#F28F43|#FE123A|#910000|#0f667a|#8bbc21"
-					data-title=""
-					data-type="area"
+					data-type="areaspline"
 					data-stacking="percentage"
-					data-height="140"
 					data-tooltip-convert="B"
 					data-url="type=bytes"
-					data-legend="disabled"
 				>
 					<div class="panel-heading">
 						<h4 class="panel-title">Total Bytes
-							<small>(stacked statistics for <?php echo $bfs->config['pubif'];?>)</small>
+							<small>(type areaspline / stacked / statistics for <?php echo $bfs->config['pubif'];?>)</small>
 						</h4>
 					</div>
 					<div class="panel-body"></div>
@@ -83,20 +76,38 @@ try {
 			</div>
 			<div class="col-lg-6">
 				<div
-					class="panel panel-success load-highchart"
+					class="panel panel-default load-highchart"
 					id="highchart-packets"
 					data-source="json"
 					data-ytitle=""
 					data-colors="#000000|#F28F43|#FE123A|#910000|#0f667a|#8bbc21"
-					data-title=""
-					data-type="line"
-					data-height="140"
+					data-type="spline"
 					data-url="type=packets"
 					data-legend="disabled"
 				>
 					<div class="panel-heading">
 						<h4 class="panel-title">Total Packets
-							<small>(statistics for <?php echo $bfs->config['pubif'];?>)</small>
+							<small>(type spline / custom colors / no legend / statistics for <?php echo $bfs->config['pubif'];?>)</small>
+						</h4>
+					</div>
+					<div class="panel-body"></div>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div
+					class="panel panel-warning load-highchart"
+					id="highchart-packets"
+					data-source="json"
+					data-ytitle=""
+					data-colors="#000000|#F28F43|#FE123A|#910000|#0f667a|#8bbc21"
+					data-type="spline"
+					data-url="type=packets"
+					data-legend="disabled"
+					data-stacking="percentage"
+				>
+					<div class="panel-heading">
+						<h4 class="panel-title">Total Packets
+							<small>(type spline / custom colors / stacked / no legend / statistics for <?php echo $bfs->config['pubif'];?>)</small>
 						</h4>
 					</div>
 					<div class="panel-body"></div>
