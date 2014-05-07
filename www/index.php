@@ -18,6 +18,8 @@ try {
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title>BFS</title>
 		<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
+		<link rel="shortcut icon" href="favicon.ico" />
+		<link rel="shortcut icon" type="image.png" href="favicon.png" />
 		<!--[if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 	</head>
 	<body>
