@@ -29,17 +29,15 @@ BASEFOLDER="$( cd -P "$( dirname "${SOURCE}" )/../" && pwd )"
 
 # Please don't change anything below this line
 #============================================================================
-CONFFILE=${BASEFOLDER}'/conf/bfs.conf'
+CONF_FILE=${BASEFOLDER}'/conf/bfs.conf'
 
-function _load_config() {
-	if [ -f ${CONFFILE} ];
-	then
-		source ${CONFFILE}
-	else
-		echo ${CONFFILE} not found. Exiting.
-		exit 1
-	fi
-	[[ "${LOADEDOK}" != "yes" ]] && (echo "Couldn't process the config file. Exiting."; exit 1)
+function _load_files() {
+	FUNCTIONS_FILE="bfs.functions.sh"
+	if [[ -f "${CONF_FILE}" ]]; then source "${CONF_FILE}"; else echo "Error loading ${CONF_FILE}. Exiting."; exit 1; fi
+	FUNCTIONS_FILE="${BASEFOLDER}/inc/${FUNCTIONS_FILE}"
+	if [[ -f "${FUNCTIONS_FILE}" ]]; then source "${FUNCTIONS_FILE}"; else echo "Error loading ${FUNCTIONS_FILE}. Exiting."; exit 1; fi
+
+	_check_all
 }
 
 function _stop_firewall() {
@@ -139,12 +137,10 @@ function _start_firewall() {
 }
 
 function _main() {
-    _load_config
-
     _stop_firewall
     _start_firewall
 
 }
-
+_load_files
 _main "$@"
 
