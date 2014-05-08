@@ -1,7 +1,9 @@
 <?php
 
-$classFile= realpath(__DIR__ . '/../inc/bfs.class.php');
-if ((!file_exists($classFile))||(!is_readable($classFile))) {
+$classFile= __DIR__ . '/../inc/bfs.class.php';
+if (file_exists($classFile) && is_readable($classFile)) {
+	$classFile = realpath($classFile);
+} else {
 	die($classFile . ' doesn\'t exist.');
 }
 
@@ -11,6 +13,8 @@ try {
 } catch (Exception $e) {
 	die('Error loading the core class file. The error was: ' . $e->getMessage());
 }
+
+$files = $bfs->getFiles();
 
 ?><!DOCTYPE html>
 <html>
@@ -74,7 +78,7 @@ try {
 					<div class="panel-body"></div>
 				</div>
 			</div>
-			<div class="col-lg-6">
+			<div class="col-lg-12">
 				<div
 					class="panel panel-default load-highchart"
 					id="highchart-packets"
@@ -93,26 +97,29 @@ try {
 					<div class="panel-body"></div>
 				</div>
 			</div>
-			<div class="col-lg-6">
-				<div
-					class="panel panel-warning load-highchart"
-					id="highchart-packets"
-					data-source="json"
-					data-ytitle=""
-					data-colors="#000000|#F28F43|#FE123A|#910000|#0f667a|#8bbc21"
-					data-type="spline"
-					data-url="type=packets"
-					data-legend="disabled"
-					data-stacking="percentage"
-				>
-					<div class="panel-heading">
-						<h4 class="panel-title">Total Packets
-							<small>(type spline / custom colors / stacked / no legend / statistics for <?php echo $bfs->config['pubif'];?>)</small>
-						</h4>
+		</div>
+		<div class="container-fluid col-group">
+			<?php foreach ($files AS $file): ?>
+				<div class="col-lg-6">
+					<div
+						class="panel panel-info load-highchart"
+						id="highchart-packets"
+						data-source="json"
+						data-ytitle=""
+						data-type="areaspline"
+						data-url="type=throughput&file=<?php echo $file;?>"
+						data-colors="#0f667a"
+						data-legend="disabled"
+					>
+						<div class="panel-heading">
+						<h4 class="panel-title">Throughput for <?php echo str_replace($bfs->config['rrd_suffix'],'',(str_replace($bfs->config['csv_suffix'],'',$file)));?>
+								<small>(areaspline / custom colors / no legend)</small>
+							</h4>
+						</div>
+						<div class="panel-body"></div>
 					</div>
-					<div class="panel-body"></div>
 				</div>
-			</div>
+			<?php endforeach; ?>
 		</div>
 		<script type="text/javascript" src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 		<script type="text/javascript" src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>

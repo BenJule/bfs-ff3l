@@ -65,19 +65,19 @@ function _start_firewall() {
 	${IPT} -A ${LOG} -j REJECT -m comment --comment "${STATS_COMMENT_PREFIX} 2-REJECT"
 	
 	###
+	# Statistics for dropped packets
+	###
+	${IPT} -N ${DSTATS}
+	${IPT} -A ${DSTATS} -j DROP -m comment --comment "${STATS_COMMENT_PREFIX} 1-DROP"
+	
+	###
 	# The Statistics
 	###
 	${IPT} -N ${STATS}
 	${IPT} -A ${STATS} -s ${IP} -j ACCEPT -m comment --comment "${STATS_COMMENT_PREFIX} 3-UPLOAD Source Local Destination Alien"
 	${IPT} -A ${STATS} -d ${IP} -j ACCEPT -m comment --comment "${STATS_COMMENT_PREFIX} 4-DOWNLOAD Source Alien Destination Local"
 	${IPT} -A ${STATS} -j LOG --log-prefix "BFS Stats: " --log-level 4 -m comment --comment "Log packages which are not supposed to be here"
-	${IPT} -A ${STATS} -j ACCEPT -m comment --comment "${STATS_COMMENT_PREFIX} 5-PASSTHROUGH Source Alien Destination Local"
-	
-	###
-	# Statistics for dropped packets
-	###
-	${IPT} -N ${DSTATS}
-	${IPT} -A ${DSTATS} -j DROP -m comment --comment "${STATS_COMMENT_PREFIX} 1-DROP"
+	${IPT} -A ${STATS} -j ${DSTATS} -m comment --comment "Source Alien Destination Alien"
 	
 	###
 	# Loopback

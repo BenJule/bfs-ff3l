@@ -30,12 +30,20 @@ if (isset($_REQUEST['end']) && $bfs->isTimestamp($_REQUEST['end'])) {
 	$options['end'] = $_REQUEST['end'];
 }
 
-foreach ($files AS $file) {
-	try {
-		$values[] = $bfs->getValues($file,$options);
-	} catch (Exception $e) {
-		$values[] = 'Error loading ' . $file . '. The Exception message is: ' . $e->getMessage();
+
+//Request for data from a specific database
+if (isset($_REQUEST['file']) && in_array($_REQUEST['file'],$files)) {
+	$values[] = $bfs->getValues($_REQUEST['file'], $options);
+} elseif (!isset($_REQUEST['file'])) {
+	foreach ($files AS $file) {
+		try {
+			$values[] = $bfs->getValues($file,$options);
+		} catch (Exception $e) {
+			$values[] = 'Error loading ' . $file . '. The Exception message is: ' . $e->getMessage();
+		}
 	}
+} else {
+	$values[] = 'The database filename requested is invalid.';
 }
 
 header('Content-Type: application/json');
