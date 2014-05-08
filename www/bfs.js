@@ -355,7 +355,12 @@ BFS = (function(a, b) {
 			options : options
 		};
 		//Redraws the graph once it's loaded
-		z.v.graphs[options.graphName].graph.reflow();
+		//z.v.graphs[options.graphName].graph.reflow();
+
+		//Redraw all the initialized graphs, as the width of the page might have changed.
+		//Change of page width triggers change of width for the panel holding the graphs.
+		z.reflowAll();
+
 	}
 
 	/**
@@ -453,7 +458,7 @@ BFS = (function(a, b) {
 							var target = response[i].target, graph = z.v.graphs[k].graph;
 							if (z.v.graphs[k].graph.series[l].name == target) {
 								graph.series[l].setData(z.processDatapoints(response[i].datapoints,options), true);
-								graph.reflow();
+								//graph.reflow();
 							}
 						}
 					}
@@ -490,7 +495,6 @@ BFS = (function(a, b) {
 	z.reflowAll = function() {
 		for ( var i in z.v.graphs) {
 			z.v.graphs[i].graph.reflow();
-			console.log(i);
 		}
 	}
 
