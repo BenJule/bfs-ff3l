@@ -109,6 +109,7 @@ $files = $bfs->getFiles();
 						data-type="areaspline"
 						data-url="type=throughput&file=<?php echo $file;?>"
 						data-colors="#0f667a"
+						data-tooltip-convert="B"
 						data-legend="disabled"
 					>
 						<div class="panel-heading">
