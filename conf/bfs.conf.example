@@ -26,6 +26,10 @@ MODAL='bfs.modal.php'
 # BASH - only variables
 ############################################################################################################
 
+#Files
+#The functions file
+FUNCTIONS_FILE="bfs.functions.sh"
+
 # Important! Use this string to identify for which rules the stats script should gather the data.
 STATS_COMMENT_PREFIX='STS' # The comment prefix, by which the stats are generated
 
@@ -58,16 +62,6 @@ SED=$(which sed 2>/dev/null) # The sed binary
 RRDT=$(which rrdtool 2>/dev/null) # The rrdtool binary
 #RRDT='/usr/bin/rrdtool'
 
-
-# Sanity checks
-if [ -z "${IPT}" ]; then echo "Couldn't find the 'iptables' binary. Current path is: ${PATH}"; exit 1; fi
-if [ -z "${GREP}" ]; then echo "Couldn't find the 'grep' binary. Current path is: ${PATH}"; exit 1; fi
-if [ -z "${AWK}" ] ; then echo "Couldn't find the 'awk' binary. Current path is: ${PATH}"; exit 1; fi
-if [ -z "${DATE}" ]; then echo "Couldn't find the 'date' binary. Current path is: ${PATH}"; exit 1; fi
-if [ -z "${IPB}" ] ; then echo "Couldn't find the 'ip' binary. Current path is: ${PATH}"; exit 1; fi
-if [ -z "${SED}" ] ; then echo "Couldn't find the 'sed' binary. Current path is: ${PATH}"; exit 1; fi
-if [ "${DB}" = rrd ] || [ "${DB}" = both ]; then if [ -z ${RRDT} ]; then echo "Couldn't find the 'rrdtool' binary. Current path is: ${PATH}"; exit 1; fi; fi
-
 # Get the IP address of the public interface - needed for the firewall script
 IP=$(${IPB} -f inet addr show dev ${PUBIF} | ${SED} -n 's/^ *inet *\([.0-9]*\).*/\1/p' 2> /dev/null) # The public IP address
 #IP='1.2.3.4'
@@ -75,12 +69,3 @@ IP=$(${IPB} -f inet addr show dev ${PUBIF} | ${SED} -n 's/^ *inet *\([.0-9]*\).*
 # The timestamp for inserting the data
 TIMESTAMP=$(${DATE} +%s)
 
-# Sanity checks
-[[ -z ${IP} ]] && (echo "Couldn't calculate the IP address."; exit 1)
-[[ -z ${TIMESTAMP} ]] && (echo "Couldn't calculate the timestamp."; exit 1)
-
-###
-# Don't add anything below this line. The next variable is used to check that the config file was loaded
-# properly.
-############################################################################################################
-LOADEDOK='yes'
