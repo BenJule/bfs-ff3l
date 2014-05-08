@@ -47,6 +47,11 @@ class BitleaderFirewallStatistics {
 	);
 
 	/**
+	 * @var string The base absolute path to BFS
+	 */
+	public $basePath = null;
+
+	/**
 	 * @var array The type of metric requested
 	 */
 	public $types = array(
@@ -62,16 +67,19 @@ class BitleaderFirewallStatistics {
 	 * @throws Exception If the config file doesn't exist or is unreadable
 	 */
 	public function __construct($confFile = null) {
+		$this->basePath = realpath(__DIR__ . '/..');
+
 		if ($confFile) {
-			$fullPath = realpath(__DIR__ . '/../conf/' . $confFile);
+			$fullPath = $this->basePath . '/conf/' . $confFile;
 			if (file_exists($fullPath) && (is_readable($fullPath))) {
 				$this->coreConf = $fullPath;
 			}
 		}
 
 		//Rewrites the relative path to the core config file to an absolute path
-		$this->coreConf = realpath(__DIR__ . '/../conf/' . $this->coreConf);
-		if ((!file_exists($this->coreConf)) || (!is_readable($this->coreConf))) {
+		$this->coreConf = $this->basePath . '/conf/' . $this->coreConf;
+
+		if ((! file_exists($this->coreConf)) ||(! is_readable($this->coreConf))) {
 			throw new Exception('Configuration file ' . $this->coreConf  . ' not found!');
 		}
 
@@ -84,7 +92,9 @@ class BitleaderFirewallStatistics {
 	 */
 	public function getSettings() {
 		$configContents = file_get_contents($this->coreConf);
+
 		$configLines = explode("\n",$configContents);
+
 		foreach ($configLines AS $configLine) {
 			if (preg_match('/^([\-_A-Z]+)\=([\'\"])([A-Za-z\-_0-9\.]+)([\'\"])(.*)$/',$configLine,$matches)) {
 				if (isset($this->config[strtolower($matches[1])])) {
@@ -97,7 +107,14 @@ class BitleaderFirewallStatistics {
 		$this->_makeCompatible();
 
 		//Fix file paths to be absolute
-		$this->config['modal'] = realpath(__DIR__ . '/../inc/' . $this->config['modal']);
+		$this->config['modal'] = $this->basePath . '/inc/' . $this->config['modal'];
+
+		//Folder paths
+		$this->config['db_folder'] = $this->basePath . '/' . $this->config['db_folder'];
+
+		if ((! is_dir($this->config['db_folder'])) || (! is_readable($this->config['db_folder']))) {
+			throw new Exception('Database folder ' . $this->config['db_folder'] . ' is not accessible.');
+		}
 
 		foreach ($this->config AS $key => $config) {
 			if ($config === false) {
@@ -126,10 +143,7 @@ class BitleaderFirewallStatistics {
 	 * @return string[] The relative paths of the CSV files
 	 */
 	public function getFiles() {
-		if (!is_readable(__DIR__ . '/../' . $this->config['db_folder']  . '/')) {
-		    throw new Exception (__DIR__ . '/../' . $this->config['db_folder'] . '/ is not readable.');
-		}
-		$folderContents = scandir(__DIR__ . '/../' . $this->config['db_folder'] . '/');
+		$folderContents = scandir($this->config['db_folder']);
 		$validFiles = array();
 		foreach ($folderContents AS $file) {
 			$suffix = null;
@@ -168,9 +182,9 @@ class BitleaderFirewallStatistics {
 			throw new Exception ('Invalid file specified');
 		}
 
-		$absolutePath = __DIR__ . '/../' . $this->config['db_folder'] . '/' . $file;
-		if (!is_readable($absolutePath)) {
-		    throw new Exception ('File $absolutePath is not readable (check permissions)');
+		$filePath = $this->config['db_folder'] . '/' . $file;
+		if (!is_readable($filePath)) {
+		    throw new Exception ('File ' . $filePath . ' is not readable (check permissions)');
 		}
 
 		if ((!$options) || (!isset($options['type'])) || (!in_array($options['type'],$this->types))) {
@@ -194,10 +208,10 @@ class BitleaderFirewallStatistics {
 		switch ($this->config['db']) {
 			case 'both':
 			case 'rrd':
-				$return = $this->_getValuesRrd($absolutePath, $options);
+				$return = $this->_getValuesRrd($filePath, $options);
 				break;
 			case 'csv':
-				$return = $this->_getValuesCsv($absolutePath, $options);
+				$return = $this->_getValuesCsv($filePath, $options);
 				break;
 			default:
 				throw new Exception('Invalid database in ' . $this->coreConf);

@@ -31,7 +31,11 @@ if (isset($_REQUEST['end']) && $bfs->isTimestamp($_REQUEST['end'])) {
 }
 
 foreach ($files AS $file) {
-	$values[] = $bfs->getValues($file,$options);
+	try {
+		$values[] = $bfs->getValues($file,$options);
+	} catch (Exception $e) {
+		$values[] = 'Error loading ' . $file . '. The Exception message is: ' . $e->getMessage();
+	}
 }
 
 header('Content-Type: application/json');
