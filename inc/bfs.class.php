@@ -4,6 +4,9 @@
  *
  * PHP Version 5.3
  *
+ * @package BFS
+ * @author tlex <tlex@e-tel.eu>
+ * @version 1.0
  * @copyright 2014 Alexandru Thomae / BitLeader (http://www.bitleader.com)
  * @license http://www.gnu.org/licenses/ GPLv3
  *
@@ -19,11 +22,11 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- **/
+ */
 
 /**
  * class BitleaderFirewallStatistics definition
- **/
+ */
 class BitleaderFirewallStatistics {
 
 	/**
