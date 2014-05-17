@@ -26,7 +26,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-$coreFile = __DIR__ . '/../inc/bfs.class.php';
+$coreFile = __DIR__ . '/../inc/ClassBitleaderFirewallStatistics.php';
 if ((!file_exists($coreFile))||(!is_readable($coreFile))) {
 	die ($coreFile . ' doesn\'t exist.');
 }

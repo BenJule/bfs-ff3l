@@ -8,7 +8,7 @@
 PUBIF="eth0" # Example: 'eth0' 'bond0'
 
 # The database. Use 'csv' or 'rrd'. Other values will likely break the code
-DB='both' # example 'both'
+DB='rrd' # example 'both'
 
 # Database files
 CSV_SUFFIX='_traffic.csv' # example '.csv'
@@ -20,7 +20,8 @@ DB_FOLDER='db' # example: 'db'
 ###
 # PHP - only variables
 ###
-MODAL='bfs.modal.php'
+TPL_FOLDER='tpl' # example: 'tpl' - The template files
+MODAL='modal.tpl'
 
 ###
 # BASH - only variables
@@ -28,7 +29,7 @@ MODAL='bfs.modal.php'
 
 #Files
 #The functions file
-FUNCTIONS_FILE="bfs.functions.sh"
+FUNCTIONS_FILE="functions.sh"
 
 # Important! Use this string to identify for which rules the stats script should gather the data.
 STATS_COMMENT_PREFIX='STS' # The comment prefix, by which the stats are generated
