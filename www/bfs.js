@@ -229,7 +229,7 @@ BFS = (function(a, b) {
 					type : $me.attr('data-type') || 'spline',
 					source : $me.attr('data-source') || 'json',
 					graphName : $me.attr('id'),
-					colors : $me.attr('data-colors') && ($me.attr('data-colors').split('|')) || ['#FF551C', '#910000', '#8bbc21', '#1aadce', '#0D233A', '#492970', '#f28f43', '#77a1e5', '#c42525', '#a6c96a'],
+					colors : $me.attr('data-colors') && ($me.attr('data-colors').split('|')) || ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9', '#f15c80', '#e4d354', '#8085e8', '#8d4653', '#91e8e1'],
 					minRange : $me.attr('data-min-range') || 3600000,
 					height : $me.attr('data-height') || 200,
 					stacking : $me.attr('data-stacking') || null,
@@ -243,7 +243,7 @@ BFS = (function(a, b) {
 					plotYTitle : $me.attr('data-plot-y-title') || null,
 					tooltipFormat : $me.attr('data-tooltip-format') || null,
 					tooltipConvert : $me.attr('data-tooltip-convert') || null,
-					reloadInterval : $me.attr('data-reload-interval') || Math.floor(Math.random() * (240 - 121) + 120), // see
+					reloadInterval : $me.attr('data-reload-interval') || Math.floor(Math.random() * (60 - 31) + 30), // see
 				// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
 					zoomType : $me.attr('data-zoom-type') || 'x',
 					yTitle : $me.attr('data-ytitle') || null,
@@ -300,9 +300,6 @@ BFS = (function(a, b) {
 				zoomType : options.zoomType,
 				spacing : [5, 5, 5, 5],
 				height : options.height,
-				events : {
-				// load : z.loadGraphiteData(options)
-				}
 			},
 			colors : options.colors,
 			credits : {
@@ -332,6 +329,10 @@ BFS = (function(a, b) {
 					marker : {
 						enabled : options.markers
 					},
+					enableMouseTracking : true,
+					dataGrouping : {
+						enabled : false
+					},
 					stacking : options.stacking
 				},
 				spline : {
@@ -356,7 +357,7 @@ BFS = (function(a, b) {
 					enabled : options.markers
 				},
 				minorTickInterval : 'auto',
-				tickPixelInterval : 25,
+				tickPixelInterval : 50,
 				title : {
 					text : options.yTitle
 				},
@@ -465,14 +466,14 @@ BFS = (function(a, b) {
 	z.getUrl = function(options) {
 		var url = z.v.jsonUrl + '?' + options.urlAppend;
 		var now = Math.round((Date.now() / 1000) - 1);
-		//For now, hardcoded to the last 12h
-		var start = now - (12 * 60 * 60);
+		//For now, hardcoded to the last 3h
+		var start = now - (3 * 60 * 60);
 		url += '&start=' + start + "&end=" + now;
 		return url;
 	}
 
 	/**
-	 * Processes the graphite response
+	 * Processes the json response
 	 * 
 	 * @param response
 	 * @param options
@@ -484,7 +485,7 @@ BFS = (function(a, b) {
 					if (k == options.graphName) {
 						for ( var l in z.v.graphs[k].graph.series) {
 							var target = response[i].target, graph = z.v.graphs[k].graph;
-							if (z.v.graphs[k].graph.series[l].name == target) {
+							if (graph.series[l].name == target) {
 								graph.series[l].setData(z.processDatapoints(response[i].datapoints,options), true);
 								//graph.reflow();
 							}
@@ -505,15 +506,13 @@ BFS = (function(a, b) {
 	z.reloadAllGraphs = function(z) {
 		for ( var i in z.v.graphs) {
 			var options = z.v.graphs[i].options;
-			if (options.source !== 'local') {
-				var loadOptions = {
-					url : z.getUrl(options),
-					success : function(response) {
-						z.processResponse(response, options);
-					}
-				};
-				a.loadData(loadOptions);
-			}
+			var loadOptions = {
+				url : z.getUrl(options),
+				success : function(response) {
+					z.processResponse(response, options);
+				}
+			};
+			a.loadData(loadOptions);
 		}
 	}
 

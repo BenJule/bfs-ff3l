@@ -68,7 +68,7 @@ $files = $bfs->getFiles();
 			<div class="col-lg-12">
 				<div
 					class="panel panel-danger load-highchart"
-					id="highchart-throughput"
+					id="highchart-total-throughput"
 					data-source="json"
 					data-ytitle=""
 					data-type="area"
@@ -87,7 +87,60 @@ $files = $bfs->getFiles();
 			<div class="col-lg-12">
 				<div
 					class="panel panel-success load-highchart"
-					id="highchart-bytes"
+					id="collectd-load"
+					data-source="json"
+					data-ytitle=""
+					data-url="type=collectd&folder=load"
+					data-legend="disabled"
+				>
+					<div class="panel-heading">
+					<h4 class="panel-title">System Load <small>(no legend)</small></h4>
+					</div>
+					<div class="panel-body"></div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid col-group">
+			<div class="col-lg-6">
+				<div
+					class="panel panel-info load-highchart"
+					id="collectd-cpu-0"
+					data-source="json"
+					data-ytitle=""
+					data-url="type=collectd&folder=cpu-0"
+					data-legend="disabled"
+					data-stacking="percentage"
+					data-max-y=100
+				>
+					<div class="panel-heading">
+					<h4 class="panel-title">CPU 0 Load <small>(stacked / no legend)</small></h4>
+					</div>
+					<div class="panel-body"></div>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div
+					class="panel panel-info load-highchart"
+					id="collectd-cpu-1"
+					data-source="json"
+					data-ytitle=""
+					data-url="type=collectd&folder=cpu-1"
+					data-legend="disabled"
+					data-stacking="percentage"
+					data-max-y=100
+				>
+					<div class="panel-heading">
+					<h4 class="panel-title">CPU 1 Load <small>(stacked / no legend)</small></h4>
+					</div>
+					<div class="panel-body"></div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="col-lg-12">
+				<div
+					class="panel panel-success load-highchart"
+					id="highcharts-total-bytes"
 					data-source="json"
 					data-ytitle=""
 					data-alias="total"
@@ -107,7 +160,7 @@ $files = $bfs->getFiles();
 			<div class="col-lg-12">
 				<div
 					class="panel panel-default load-highchart"
-					id="highchart-packets"
+					id="highcharts-total-packets"
 					data-source="json"
 					data-ytitle=""
 					data-colors="#000000|#F28F43|#FE123A|#910000|#0f667a|#8bbc21"
@@ -125,11 +178,11 @@ $files = $bfs->getFiles();
 			</div>
 		</div>
 		<div class="container-fluid col-group">
-			<?php foreach ($files AS $file): ?>
+			<?php foreach ($files AS $key => $file): ?>
 				<div class="col-lg-6">
 					<div
 						class="panel panel-info load-highchart"
-						id="highchart-packets"
+						id="highchart-throughput-<?php echo $key; ?>"
 						data-source="json"
 						data-ytitle=""
 						data-type="areaspline"

@@ -40,13 +40,26 @@ class BitleaderFirewallStatistics {
 	 * Setting the values to "false" because with "null" isset returns false.
 	 */
 	public $config = array(
-		'pubif' => false,
-		'stats_comment_prefix' => false,
-		'csv_suffix' => false,
-		'rrd_suffix' => false,
-		'db' => false,
-		'db_folder' => false,
-		'modal' => false,
+		'pubif' => null,
+		'stats_comment_prefix' => null,
+		'csv_suffix' => null,
+		'rrd_suffix' => null,
+		'db' => 'rrd',
+		'db_folder' => null,
+		'modal' => null,
+		'enable_collectd' => null,
+		'collectd_rrd_path' => null,
+	);
+
+	/**
+	 * These are changable at runtime
+	 *
+	 * @var array the settings
+	 */
+	public $settings = array(
+		'start' => null,
+		'end' => null,
+		'type' => 'throughput',
 	);
 
 	/**
@@ -61,6 +74,7 @@ class BitleaderFirewallStatistics {
 		'bytes',
 		'throughput',
 		'packets',
+		'collectd',
 	);
 
 	/**
@@ -91,6 +105,63 @@ class BitleaderFirewallStatistics {
 	}
 
 	/**
+	 * The setter function for $this->settings['start']
+	 *
+	 * @param timestamp $timestamp
+	 */
+	public function setStart($timestamp) {
+		if ($this->isTimestamp($timestamp)) {
+			$this->settings['start'] = $timestamp;
+		}
+	}
+
+	/**
+	 * The setter function for $this->settings['end']
+	 *
+	 * @param timestamp $timestamp
+	 */
+	public function setEnd($timestamp) {
+		if ($this->isTimestamp($timestamp)) {
+			$this->settings['end'] = $timestamp;
+		}
+	}
+
+	/**
+	 * The setter function for $this->settings['type']
+	 *
+	 * @param string $type One of $this->types[]
+	 */
+	public function setMetricType($type) {
+		if (in_array($type, $this->types)) {
+			$this->settings['type'] = $type;
+		}
+	}
+
+	/**
+	 * The setter function for $this->settings['folder']
+	 *
+	 * @param string $folder One of the metrics in $this->config['collectd_rrd_path']/
+	 */
+	public function setMetricFolder($folder) {
+		if (!$this->config['collectd_rrd_path']) {
+			throw new Exception('The collectd RRD path is not set.');
+		}
+
+		if ((!is_dir($this->config['collectd_rrd_path'])) || (!is_readable($this->config['collectd_rrd_path']))) {
+			throw new Exception('The collectd RRD path is invalid.');
+		}
+
+		if (
+			(!is_dir($this->config['collectd_rrd_path'] . DIRECTORY_SEPARATOR . $folder))
+			|| (!is_readable($this->config['collectd_rrd_path'] . DIRECTORY_SEPARATOR . $folder))
+		) {
+			throw new Exception('The specified metric folder is invalid.');
+		}
+		$this->config['db_folder'] = $this->config['collectd_rrd_path'] . DIRECTORY_SEPARATOR . $folder;
+		$this->config['db'] = 'collectd';
+	}
+
+	/**
 	 * Loads the settings from the config file
 	 */
 	public function getSettings() {
@@ -99,8 +170,8 @@ class BitleaderFirewallStatistics {
 		$configLines = explode("\n",$configContents);
 
 		foreach ($configLines AS $configLine) {
-			if (preg_match('/^([\-_A-Z]+)\=([\'\"])([A-Za-z\-_0-9\.]+)([\'\"])(.*)$/',$configLine,$matches)) {
-				if (isset($this->config[strtolower($matches[1])])) {
+			if (preg_match('/^([\-_A-Z]+)\=([\'\"])([A-Za-z\-_0-9\.\/]+)([\'\"])(.*)$/',$configLine,$matches)) {
+				if (array_key_exists(strtolower($matches[1]),$this->config)) {
 					$this->config[strtolower($matches[1])] = $matches[3];
 				}
 			}
@@ -120,12 +191,10 @@ class BitleaderFirewallStatistics {
 		}
 
 		foreach ($this->config AS $key => $config) {
-			if ($config === false) {
+			if ($config === null) {
 				throw new Exception('Missing configuration value in ' . $this->coreConf . '. Please add "' . strtoupper($key) . '=your-value"');
 			}
 		}
-		//For tests only
-		//$this->config['db'] = 'csv';
 	}
 
 	/**
@@ -158,6 +227,10 @@ class BitleaderFirewallStatistics {
 				case 'csv':
 					$suffix = $this->config['csv_suffix'];
 					break;
+				case 'collectd':
+					$this->config['rrd_suffix'] = '.rrd';
+					$suffix = '.rrd';
+					break;
 				default:
 					throw new Exception('Invalid database in ' . $this->coreConf);
 			}
@@ -173,14 +246,10 @@ class BitleaderFirewallStatistics {
 	 * Loads the contents of the CSV file and returns an array with the values
 	 *
 	 * @param string $file The name of the csv file. Will be checked against self::getCsvFiles()
-	 * @param array $options containing:
-	 *				['type'] - One of self::types
-	 *				['start'](optional) - start timestamp - defalt now-48h
-	 *				['end'](optional) end timestamp - default now
 	 * @throws Exception if the file is invalid or isn't readable
 	 * @return array The values in form array('target' => $key0,'datapoints'[] => array($value,$timestamp)
 	 */
-	public function getValues($file,array $options = array()) {
+	public function getValues($file) {
 		if (!in_array($file,$this->getFiles())) {
 			throw new Exception ('Invalid file specified');
 		}
@@ -190,36 +259,29 @@ class BitleaderFirewallStatistics {
 		    throw new Exception ('File ' . $filePath . ' is not readable (check permissions)');
 		}
 
-		if ((!$options) || (!isset($options['type'])) || (!in_array($options['type'],$this->types))) {
-			$options['type'] = 'throughput';
-		}
-
-		if (!isset($options['start'])) {
+		if (!$this->settings['start']) {
 			//							  seconds   minutes   hours   days
-			$options['start'] = time() - (  60    *   60    *   24  *  10);
-			$options['start'] = 1399100271;
+			$this->settings['start'] = time() - (  60    *   60    *   24  *  10);
 		}
 
-		if (!isset($options['end'])) {
-			$options['end'] = time();
+		if (!$this->settings['end']) {
+			$this->settings['end'] = time();
 		}
 
-		$options['file'] = $file;
-
-		$return = array();
+		$this->settings['file'] = $file;
 
 		switch ($this->config['db']) {
 			case 'both':
 			case 'rrd':
-				$return = $this->_getValuesRrd($filePath, $options);
+			case 'collectd':
+				return $this->_getValuesRrd($filePath);
 				break;
 			case 'csv':
-				$return = $this->_getValuesCsv($filePath, $options);
+				return $this->_getValuesCsv($filePath);
 				break;
 			default:
 				throw new Exception('Invalid database in ' . $this->coreConf);
 		}
-		return $return;
 	}
 
 	/**
@@ -232,7 +294,7 @@ class BitleaderFirewallStatistics {
 	 * @param array $options see self::getValues()
 	 * @return array
 	 */
-	private function _getValuesCsv($file, array $options = array()) {
+	private function _getValuesCsv($file) {
 		$fileContent = file_get_contents($file);
 		$lines = explode("\n",$fileContent);
 		$values = array();
@@ -248,7 +310,7 @@ class BitleaderFirewallStatistics {
 				$return = array(
 					'target' => $value[0],
 					'datapoints' => array(),
-					'type' => $options['type'],
+					'type' => $this->settings['type'],
 				);
 			}
 			$timestamp = intval($value[3]);
@@ -257,8 +319,8 @@ class BitleaderFirewallStatistics {
 				$previousTimestamp = intval($return['datapoints'][$index-1][1]);
 			}
 			if (
-				(intval($options['start']) <= $timestamp)
-				&& (intval($options['end']) >= $timestamp)
+				(intval($this->settings['start']) <= $timestamp)
+				&& (intval($this->settings['end']) >= $timestamp)
 				&& ($timestamp > $previousTimestamp)         //catching possible errors in the CSV file
 			) {
 				$throughput = null;
@@ -270,7 +332,7 @@ class BitleaderFirewallStatistics {
 						$throughput = number_format(($bytes / $interval) * 60, 2, '.', '');
 					}
 				}
-				$return['datapoints'][$index] = array($$options['type'],$timestamp);
+				$return['datapoints'][$index] = array($$this->settings['type'],$timestamp);
 				$index++;
 			}
 		}
@@ -284,19 +346,19 @@ class BitleaderFirewallStatistics {
 	 * @param array $options see self::getValues()
 	 * @return array
 	 */
-	private function _getValuesRrd($file, array $options = array()) {
+	private function _getValuesRrd($file) {
 		$return = array();
-		$rrdResults = @rrd_fetch($file,array('AVERAGE','--start',$options['start'],'--end',$options['end']));
+		$rrdResults = @rrd_fetch($file,array('AVERAGE','--start',$this->settings['start'],'--end',$this->settings['end']));
 		if ($rrdResults) {
-			$target = str_replace($this->config['rrd_suffix'],'',$options['file']);
+			$target = str_replace($this->config['rrd_suffix'],'',$this->settings['file']);
 			$return = array(
 				'target' => $target,
 				'datapoints' => array(),
-				'type' => $options['type'],
+				'type' => $this->settings['type'],
 			);
 
 			//for 'throughput' we need to calculate the values based on bytes and interval, as we don't save it in the RRD
-			if ($options['type'] == 'throughput') {
+			if ($this->settings['type'] == 'throughput') {
 				$rrdResults['data']['throughput'] = array();
 				unset($rrdResults['data']['packets']);
 				$bytes = array();
@@ -329,10 +391,19 @@ class BitleaderFirewallStatistics {
 
 			//free the memory
 			foreach ($rrdResults['data'] AS $type => $data) {
-				if ($options['type'] != $type) unset($rrdResults['data'][$type]);
+				if ($this->settings['type'] != 'collectd') {
+					if ($this->settings['type'] != $type) {
+						unset($rrdResults['data'][$type]);
+					} else {
+						$dataType = $type;
+					}
+				} else {
+					$dataType = $type;
+				}
 			}
 
-			foreach ($rrdResults['data'][$options['type']] AS $timestamp => $metric) {
+
+			foreach ($rrdResults['data'][$dataType] AS $timestamp => $metric) {
 				if (strtoupper($metric) == 'NAN') {
 					$metric = null;
 				} else {
