@@ -40,6 +40,7 @@ class BitleaderFirewallStatistics {
 	 * Setting the values to "false" because with "null" isset returns false.
 	 */
 	public $config = array(
+<<<<<<< HEAD:inc/bfs.class.php
 		'pubif' => null,
 		'stats_comment_prefix' => null,
 		'csv_suffix' => null,
@@ -48,6 +49,7 @@ class BitleaderFirewallStatistics {
 		'db_folder' => null,
 		'modal' => null,
 		'enable_collectd' => null,
+		'tpl_folder' => null,
 		'collectd_rrd_path' => null,
 	);
 
@@ -60,6 +62,16 @@ class BitleaderFirewallStatistics {
 		'start' => null,
 		'end' => null,
 		'type' => 'throughput',
+=======
+		'pubif' => false,
+		'stats_comment_prefix' => false,
+		'csv_suffix' => false,
+		'rrd_suffix' => false,
+		'db' => false,
+		'db_folder' => false,
+		'tpl_folder' => false,
+		'modal' => false,
+>>>>>>> f9004a0af5814954348fc7c48d38a24a51965964:inc/ClassBitleaderFirewallStatistics.php
 	);
 
 	/**
@@ -180,8 +192,11 @@ class BitleaderFirewallStatistics {
 		//maintain backwords compatibility for new configuration variables
 		$this->_makeCompatible();
 
+		//Folder paths
+		$this->config['tpl_folder'] = $this->basePath . '/' . $this->config['tpl_folder'];
+
 		//Fix file paths to be absolute
-		$this->config['modal'] = $this->basePath . '/inc/' . $this->config['modal'];
+		$this->config['modal'] = $this->config['tpl_folder'] . '/' . $this->config['modal'];
 
 		//Folder paths
 		$this->config['db_folder'] = $this->basePath . '/' . $this->config['db_folder'];
@@ -204,7 +219,10 @@ class BitleaderFirewallStatistics {
 	 */
 	private function _makeCompatible() {
 		if (!$this->config['modal']) {
-			$this->config['modal'] = 'bfs.modal.php';
+			$this->config['modal'] = 'modal.tpl';
+		}
+		if (!$this->config['tpl_folder']) {
+			$this->config['tpl_folder'] = 'tpl';
 		}
 	}
 

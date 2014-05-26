@@ -26,7 +26,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-$classFile= __DIR__ . '/../inc/bfs.class.php';
+$classFile= __DIR__ . '/../inc/ClassBitleaderFirewallStatistics.php';
 if (file_exists($classFile) && is_readable($classFile)) {
 	$classFile = realpath($classFile);
 } else {
