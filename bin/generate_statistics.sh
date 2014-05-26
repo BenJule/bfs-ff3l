@@ -46,7 +46,7 @@ BASEFOLDER="$( cd -P "$( dirname "${SOURCE}" )/../" && pwd )"
 CONF_FILE=${BASEFOLDER}'/conf/bfs.conf'
 
 function _load_files() {
-	FUNCTIONS_FILE="bfs.functions.sh"
+	FUNCTIONS_FILE="functions.sh"
 	if [[ -f "${CONF_FILE}" ]]; then source "${CONF_FILE}"; else echo "Error loading ${CONF_FILE}. Exiting."; exit 1; fi
 	FUNCTIONS_FILE="${BASEFOLDER}/inc/${FUNCTIONS_FILE}"
 	if [[ -f "${FUNCTIONS_FILE}" ]]; then source "${FUNCTIONS_FILE}"; else echo "Error loading ${FUNCTIONS_FILE}. Exiting.";exit 1; fi
