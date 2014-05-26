@@ -40,7 +40,6 @@ class BitleaderFirewallStatistics {
 	 * Setting the values to "false" because with "null" isset returns false.
 	 */
 	public $config = array(
-<<<<<<< HEAD:inc/bfs.class.php
 		'pubif' => null,
 		'stats_comment_prefix' => null,
 		'csv_suffix' => null,
@@ -61,7 +60,6 @@ class BitleaderFirewallStatistics {
 		'start' => null,
 		'end' => null,
 		'type' => 'throughput',
-=======
 		'pubif' => false,
 		'stats_comment_prefix' => false,
 		'csv_suffix' => false,
@@ -70,7 +68,6 @@ class BitleaderFirewallStatistics {
 		'db_folder' => false,
 		'tpl_folder' => false,
 		'modal' => false,
->>>>>>> f9004a0af5814954348fc7c48d38a24a51965964:inc/ClassBitleaderFirewallStatistics.php
 	);
 
 	/**
