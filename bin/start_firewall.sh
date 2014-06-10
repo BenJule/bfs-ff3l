@@ -75,7 +75,7 @@ function _start_firewall() {
 	# The Log
 	###
 	${IPT} -N ${LOG}
-	${IPT} -A ${LOG} -m limit --limit 2/min -j LOG --log-prefix "BFS Reject: " --log-level 4 -m comment --comment "Rejected packages are logged"
+	#${IPT} -A ${LOG} -m limit --limit 2/min -j LOG --log-prefix "BFS Reject: " --log-level 4 -m comment --comment "Rejected packages are logged"
 	${IPT} -A ${LOG} -j REJECT -m comment --comment "${STATS_COMMENT_PREFIX} 2-REJECT"
 	
 	###
