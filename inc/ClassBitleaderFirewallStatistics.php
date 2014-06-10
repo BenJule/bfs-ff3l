@@ -68,6 +68,7 @@ class BitleaderFirewallStatistics {
 		'db_folder' => false,
 		'tpl_folder' => false,
 		'modal' => false,
+		'db_file' => null,
 	);
 
 	/**
@@ -93,6 +94,10 @@ class BitleaderFirewallStatistics {
 	 */
 	public function __construct($confFile = null) {
 		$this->basePath = realpath(__DIR__ . '/..');
+
+		//Set defaults for start and end
+		$this->settings['start'] = (time() - (60 * 60 * 24));
+		$this->settings['end'] = time();
 
 		if ($confFile) {
 			$fullPath = $this->basePath . '/conf/' . $confFile;
@@ -167,6 +172,15 @@ class BitleaderFirewallStatistics {
 		}
 		$this->config['db_folder'] = $this->config['collectd_rrd_path'] . DIRECTORY_SEPARATOR . $folder;
 		$this->config['db'] = 'collectd';
+	}
+
+	public function setMetricFile($file) {
+		if ($this->config['db'] != 'collectd') {
+			throw new Exception('Set the collectd folder first!');
+		}
+		if (file_exists($this->config['db_folder'] . DIRECTORY_SEPARATOR . $file . '.rrd')) {
+			$this->config['db_file'] = $file . '.rrd';
+		}
 	}
 
 	/**
@@ -244,6 +258,9 @@ class BitleaderFirewallStatistics {
 				case 'collectd':
 					$this->config['rrd_suffix'] = '.rrd';
 					$suffix = '.rrd';
+					if ($this->config['db_file']) {
+						return array($this->config['db_file']);
+					}
 					break;
 				default:
 					throw new Exception('Invalid database in ' . $this->coreConf);
@@ -394,7 +411,7 @@ class BitleaderFirewallStatistics {
 							$previousTimestamp = intval($bytes[$counter-1][1]);
 							$currentBytes = intval($byte[0]);
 							$interval = ($timestamp - $previousTimestamp);
-							$throughput = number_format(($currentBytes / $interval) * 60, 2, '.', '');
+							$throughput = number_format(($currentBytes / $interval), 2, '.', '');
 						}
 					}
 					$rrdResults['data']['throughput'][$timestamp] = $throughput; 

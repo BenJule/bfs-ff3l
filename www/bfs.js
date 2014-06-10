@@ -362,7 +362,12 @@ BFS = (function(a, b) {
 					text : options.yTitle
 				},
 				plotLines : options.plotYLines,
-				max : options.maxY
+				max : options.maxY,
+				labels : {
+					formatter : function () {
+						return options.tooltipConvert && (a.convertSize(this.value, options.tooltipConvert)) || this.value;
+					}
+				}
 			},
 			series : series,
 			tooltip : {
@@ -467,8 +472,8 @@ BFS = (function(a, b) {
 		var url = z.v.jsonUrl + '?' + options.urlAppend;
 		var now = Math.round((Date.now() / 1000) - 1);
 		//For now, hardcoded to the last 3h
-		var start = now - (3 * 60 * 60);
-		url += '&start=' + start + "&end=" + now;
+		//var start = now - (3 * 60 * 60);
+		//url += '&start=' + start + "&end=" + now;
 		return url;
 	}
 

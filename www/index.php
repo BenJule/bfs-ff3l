@@ -64,37 +64,58 @@ $files = $bfs->getFiles();
 				</ul>
 			</div>
 	    </div>
-		<div class="container-fluid">
-			<div class="col-lg-12">
+		<div class="container-fluid col-group">
+			<div class="col-lg-6">
 				<div
 					class="panel panel-danger load-highchart"
 					id="highchart-total-throughput"
 					data-source="json"
 					data-ytitle=""
-					data-type="area"
+					data-type="line"
 					data-stacking="percentage"
+					data-legend="disabled"
 					data-tooltip-convert="B"
 					data-url="type=throughput"
 				>
 					<div class="panel-heading">
-						<h4 class="panel-title">Total Throughput
-							<small>(area type / stacked / statistics for <?php echo $bfs->config['pubif'];?>)</small>
+						<h4 class="panel-title">Total Throughput (iptables)
+							<small>(stacked / statistics for <?php echo $bfs->config['pubif'];?>)</small>
 						</h4>
 					</div>
 					<div class="panel-body"></div>
 				</div>
 			</div>
+			<div class="col-lg-6">
+				<div
+					class="panel panel-info load-highchart"
+					id="collectd-if-<?php echo $bfs->config['pubif'];?>"
+					data-source="json"
+					data-ytitle=""
+					data-url="type=collectd&folder=interface-<?php echo $bfs->config['pubif'];?>&metric=if_octets"
+					data-legend="disabled"
+					data-tooltip-convert="B"
+				>
+					<div class="panel-heading">
+					<h4 class="panel-title">Total Throughput (collectd) <small>(stats for <?php echo $bfs->config['pubif'];?>)</small></h4>
+					</div>
+					<div class="panel-body"></div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid col-group">
 			<div class="col-lg-12">
 				<div
 					class="panel panel-success load-highchart"
 					id="collectd-load"
 					data-source="json"
 					data-ytitle=""
-					data-url="type=collectd&folder=load"
+					data-url="type=collectd&folder=cpu-even-average"
 					data-legend="disabled"
+					data-stacking="percentage"
+					data-max-y=100
 				>
 					<div class="panel-heading">
-					<h4 class="panel-title">System Load <small>(no legend)</small></h4>
+					<h4 class="panel-title">CPU Average <small>(no legend)</small></h4>
 					</div>
 					<div class="panel-body"></div>
 				</div>
@@ -102,42 +123,6 @@ $files = $bfs->getFiles();
 		</div>
 		<div class="container-fluid col-group">
 			<div class="col-lg-6">
-				<div
-					class="panel panel-info load-highchart"
-					id="collectd-cpu-0"
-					data-source="json"
-					data-ytitle=""
-					data-url="type=collectd&folder=cpu-0"
-					data-legend="disabled"
-					data-stacking="percentage"
-					data-max-y=100
-				>
-					<div class="panel-heading">
-					<h4 class="panel-title">CPU 0 Load <small>(stacked / no legend)</small></h4>
-					</div>
-					<div class="panel-body"></div>
-				</div>
-			</div>
-			<div class="col-lg-6">
-				<div
-					class="panel panel-info load-highchart"
-					id="collectd-cpu-1"
-					data-source="json"
-					data-ytitle=""
-					data-url="type=collectd&folder=cpu-1"
-					data-legend="disabled"
-					data-stacking="percentage"
-					data-max-y=100
-				>
-					<div class="panel-heading">
-					<h4 class="panel-title">CPU 1 Load <small>(stacked / no legend)</small></h4>
-					</div>
-					<div class="panel-body"></div>
-				</div>
-			</div>
-		</div>
-		<div class="container-fluid">
-			<div class="col-lg-12">
 				<div
 					class="panel panel-success load-highchart"
 					id="highcharts-total-bytes"
@@ -157,7 +142,7 @@ $files = $bfs->getFiles();
 					<div class="panel-body"></div>
 				</div>
 			</div>
-			<div class="col-lg-12">
+			<div class="col-lg-6">
 				<div
 					class="panel panel-default load-highchart"
 					id="highcharts-total-packets"
@@ -176,30 +161,6 @@ $files = $bfs->getFiles();
 					<div class="panel-body"></div>
 				</div>
 			</div>
-		</div>
-		<div class="container-fluid col-group">
-			<?php foreach ($files AS $key => $file): ?>
-				<div class="col-lg-6">
-					<div
-						class="panel panel-info load-highchart"
-						id="highchart-throughput-<?php echo $key; ?>"
-						data-source="json"
-						data-ytitle=""
-						data-type="areaspline"
-						data-url="type=throughput&file=<?php echo $file;?>"
-						data-colors="#0f667a"
-						data-tooltip-convert="B"
-						data-legend="disabled"
-					>
-						<div class="panel-heading">
-						<h4 class="panel-title">Throughput for <?php echo str_replace($bfs->config['rrd_suffix'],'',(str_replace($bfs->config['csv_suffix'],'',$file)));?>
-								<small>(areaspline / custom colors / no legend)</small>
-							</h4>
-						</div>
-						<div class="panel-body"></div>
-					</div>
-				</div>
-			<?php endforeach; ?>
 		</div>
 		<script type="text/javascript" src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 		<script type="text/javascript" src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>

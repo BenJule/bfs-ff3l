@@ -75,7 +75,7 @@ function _start_firewall() {
 	# The Log
 	###
 	${IPT} -N ${LOG}
-	#${IPT} -A ${LOG} -m limit --limit 2/min -j LOG --log-prefix "BFS Reject: " --log-level 4 -m comment --comment "Rejected packages are logged"
+	${IPT} -A ${LOG} -m limit --limit 2/min -j LOG --log-prefix "BFS Reject: " --log-level 4 -m comment --comment "Rejected packages are logged"
 	${IPT} -A ${LOG} -j REJECT -m comment --comment "${STATS_COMMENT_PREFIX} 2-REJECT"
 	
 	###
@@ -123,8 +123,8 @@ function _start_firewall() {
 	${IPT} -A INPUT -p tcp ! --syn -m state --state NEW -j ${LOG} -m comment --comment "LOG: Make sure new incoming connections are SYN packets"
 	${IPT} -A INPUT -p tcp --tcp-flags ALL ALL -j ${LOG} -m comment --comment "LOG: Reject malformed xmas packets"
 	${IPT} -A INPUT -p tcp --tcp-flags ALL NONE -j ${LOG} -m comment --comment "LOG: Reject malformed null packets"
-	${IPT} -A INPUT -i ${PUBIF} ! --destination ${IP} -p tcp -j ${LOG} -m comment --comment "LOG: TCP Package not for us"
-	${IPT} -A INPUT -i ${PUBIF} ! --destination ${IP} -p udp -j ${LOG} -m comment --comment "LOG: UDP Package not for us"
+	${IPT} -A INPUT -i ${PUBIF} ! --destination ${IP} -p tcp -j ${DSTATS} -m comment --comment "LOG: TCP Package not for us"
+	${IPT} -A INPUT -i ${PUBIF} ! --destination ${IP} -p udp -j ${DSTATS} -m comment --comment "LOG: UDP Package not for us"
 	
 	###
 	# The Allows (including statistics)

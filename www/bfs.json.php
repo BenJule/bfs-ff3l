@@ -57,6 +57,14 @@ if (isset($_REQUEST['folder'])) {
 	}
 }
 
+if (isset($_REQUEST['metric'])) {
+	try {
+		$bfs->setMetricFile($_REQUEST['metric']);
+	} catch (Exception $e) {
+		$values[] = $e->getMessage();
+	}
+}
+
 if (isset($_REQUEST['start'])) {
 	try {
 		$bfs->setStart($_REQUEST['start']);
