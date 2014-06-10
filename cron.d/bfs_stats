@@ -1,0 +1,6 @@
+# /etc/cron.d/bfs_stats: crontab fragment for bfs
+#MAILTO=your_email_here@host.com
+PATH=$PATH:/sbin:/bin:/usr/bin
+
+*/2	*	*	*	*	root	/opt/bfs/bin/generate_statistics.sh
+

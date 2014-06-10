@@ -1,0 +1,72 @@
+#!/bin/bash
+
+###
+# Common variables, used by both BASH and PHP
+############################################################################################################
+
+# The public interface
+PUBIF="eth0" # Example: 'eth0' 'bond0'
+
+# The database. Use 'csv' or 'rrd'. Other values will likely break the code
+DB='rrd' # example 'both'
+
+# Database files
+CSV_SUFFIX='_traffic.csv' # example '.csv'
+RRD_SUFFIX='_traffic.rrd' # example '.rrd'
+
+# Folders - relative paths to the ${BASEFOLDER}
+DB_FOLDER='db' # example: 'db'
+
+###
+# PHP - only variables
+###
+TPL_FOLDER='tpl' # example: 'tpl' - The template files
+MODAL='modal.tpl'
+
+###
+# BASH - only variables
+############################################################################################################
+
+#Files
+#The functions file
+FUNCTIONS_FILE="functions.sh"
+
+# Important! Use this string to identify for which rules the stats script should gather the data.
+STATS_COMMENT_PREFIX='STS' # The comment prefix, by which the stats are generated
+
+# The name of the chains
+LOG='LOGGING' # The logging chain
+STATS='STATS' # The statistics chain
+DSTATS='DSTATS' # The statistics chain for dropped packets
+
+# Binaries
+# Alternatively, you can give here the full path to the binary
+
+IPT=$(which iptables 2>/dev/null) # The iptablesy binary
+#IPT='/sbin/iptables'
+
+GREP=$(which grep 2>/dev/null) # The grep untility
+#GREP='/bin/grep'
+
+AWK=$(which awk 2>/dev/null) # The awk utility
+#AWK='/usr/bin/awk'
+
+DATE=$(which date 2>/dev/null) # The date utility
+#DATE='/bin/date'
+
+IPB=$(which ip 2>/dev/null) # The ip binary
+#IPB='/bin/ip'
+
+SED=$(which sed 2>/dev/null) # The sed binary
+#SED='/bin/sed'
+
+RRDT=$(which rrdtool 2>/dev/null) # The rrdtool binary
+#RRDT='/usr/bin/rrdtool'
+
+# Get the IP address of the public interface - needed for the firewall script
+IP=$(${IPB} -f inet addr show dev ${PUBIF} | ${SED} -n 's/^ *inet *\([.0-9]*\).*/\1/p' 2> /dev/null) # The public IP address
+#IP='1.2.3.4'
+
+# The timestamp for inserting the data
+TIMESTAMP=$(${DATE} +%s)
+
