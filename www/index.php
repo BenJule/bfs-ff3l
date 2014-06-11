@@ -67,7 +67,7 @@ $files = $bfs->getFiles();
 		<div class="container-fluid col-group">
 			<div class="col-lg-6">
 				<div
-					class="panel panel-danger load-highchart"
+					class="panel panel-info load-highchart"
 					id="highchart-total-throughput"
 					data-source="json"
 					data-ytitle=""
@@ -79,7 +79,7 @@ $files = $bfs->getFiles();
 				>
 					<div class="panel-heading">
 						<h4 class="panel-title">Total Throughput (iptables)
-							<small>(stacked / statistics for <?php echo $bfs->config['pubif'];?>)</small>
+							<small>(stacked / stats for <?php echo $bfs->config['pubif'];?>)</small>
 						</h4>
 					</div>
 					<div class="panel-body"></div>
@@ -105,7 +105,7 @@ $files = $bfs->getFiles();
 		<div class="container-fluid col-group">
 			<div class="col-lg-12">
 				<div
-					class="panel panel-success load-highchart"
+					class="panel panel-default load-highchart"
 					id="collectd-load"
 					data-source="json"
 					data-ytitle=""
@@ -115,7 +115,7 @@ $files = $bfs->getFiles();
 					data-max-y=100
 				>
 					<div class="panel-heading">
-					<h4 class="panel-title">CPU Average <small>(no legend)</small></h4>
+					<h4 class="panel-title">CPU Average (collectd)<small>(stacked / stats for CPU 0+1)</small></h4>
 					</div>
 					<div class="panel-body"></div>
 				</div>
@@ -124,7 +124,7 @@ $files = $bfs->getFiles();
 		<div class="container-fluid col-group">
 			<div class="col-lg-6">
 				<div
-					class="panel panel-success load-highchart"
+					class="panel panel-default load-highchart"
 					id="highcharts-total-bytes"
 					data-source="json"
 					data-ytitle=""
@@ -132,11 +132,11 @@ $files = $bfs->getFiles();
 					data-type="areaspline"
 					data-stacking="percentage"
 					data-tooltip-convert="B"
-					data-url="type=bytes"
+					data-url="type=bytes&start=<?php echo time()-(3*60*60);?>"
 				>
 					<div class="panel-heading">
-						<h4 class="panel-title">Total Bytes
-							<small>(type areaspline / stacked / statistics for <?php echo $bfs->config['pubif'];?>)</small>
+						<h4 class="panel-title">Total Bytes (iptables)
+							<small>(stacked / stats for <?php echo $bfs->config['pubif'];?>)</small>
 						</h4>
 					</div>
 					<div class="panel-body"></div>
@@ -150,13 +150,72 @@ $files = $bfs->getFiles();
 					data-ytitle=""
 					data-colors="#000000|#F28F43|#FE123A|#910000|#0f667a|#8bbc21"
 					data-type="spline"
-					data-url="type=packets"
-					data-legend="disabled"
+					data-url="type=packets&start=<?php echo time()-(3*60*60);?>"
 				>
 					<div class="panel-heading">
-						<h4 class="panel-title">Total Packets
-							<small>(type spline / custom colors / no legend / statistics for <?php echo $bfs->config['pubif'];?>)</small>
+						<h4 class="panel-title">Total Packets (iptables)
+							<small>(statistics for <?php echo $bfs->config['pubif'];?>)</small>
 						</h4>
+					</div>
+					<div class="panel-body"></div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid col-group">
+			<div class="col-lg-6">
+				<div
+					class="panel panel-default load-highchart"
+					id="highchart-collectd-df-root"
+					data-source="json"
+					data-ytitle=""
+					data-type="areaspline"
+					data-stacking="percentage"
+					data-legend="disabled"
+					data-tooltip-convert="B"
+					data-url="type=collectd&folder=df-root"
+				>
+					<div class="panel-heading">
+						<h4 class="panel-title">Disk Stats /root (collectd)
+							<small>(stacked)</small>
+						</h4>
+					</div>
+					<div class="panel-body"></div>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div
+					class="panel panel-default load-highchart"
+					id="highchart-collectd-df-gdrive"
+					data-source="json"
+					data-ytitle=""
+					data-type="areaspline"
+					data-stacking="percentage"
+					data-legend="disabled"
+					data-tooltip-convert="B"
+					data-url="type=collectd&folder=df-mnt-gdrive"
+					data-colors="#000000|#F28F43|#FE123A|#910000|#0f667a|#8bbc21"
+				>
+					<div class="panel-heading">
+						<h4 class="panel-title">Disk Stats /mnt/gdrive (collectd)
+							<small>(stacked)</small>
+						</h4>
+					</div>
+					<div class="panel-body"></div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid col-group">
+			<div class="col-lg-12">
+				<div
+					class="panel panel-default load-highchart"
+					id="highchart-collectd-disk-vda"
+					data-source="json"
+					data-ytitle=""
+					data-url="type=collectd&folder=disk-vda&metric=disk_ops"
+					data-type="line"
+				>
+					<div class="panel-heading">
+					<h4 class="panel-title">Disk IOPS (collectd)<small>(stats for /dev/vda)</small></h4>
 					</div>
 					<div class="panel-body"></div>
 				</div>

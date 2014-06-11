@@ -72,6 +72,12 @@ function _start_firewall() {
 	echo "Starting the firewall"
 	
 	###
+	# Loopback
+	###
+	${IPT} -A INPUT -i lo -j ACCEPT
+	${IPT} -A OUTPUT -o lo -j ACCEPT
+	
+	###
 	# The Log
 	###
 	${IPT} -N ${LOG}
@@ -90,25 +96,20 @@ function _start_firewall() {
 	${IPT} -N ${STATS}
 	${IPT} -A ${STATS} -s ${IP} -j ACCEPT -m comment --comment "${STATS_COMMENT_PREFIX} 3-UPLOAD Source Local Destination Alien"
 	${IPT} -A ${STATS} -d ${IP} -j ACCEPT -m comment --comment "${STATS_COMMENT_PREFIX} 4-DOWNLOAD Source Alien Destination Local"
-	${IPT} -A ${STATS} -j LOG --log-prefix "BFS Stats: " --log-level 4 -m comment --comment "Log packages which are not supposed to be here"
-	${IPT} -A ${STATS} -j ${DSTATS} -m comment --comment "Source Alien Destination Alien"
-	
-	###
-	# Loopback
-	###
-	${IPT} -A INPUT -i lo -j ACCEPT
+	${IPT} -A ${STATS} -j LOG --log-prefix "BFS Stats: " --log-level 4 -m comment --comment "LOG: packages which are not supposed to be here"
+	${IPT} -A ${STATS} -j ${DSTATS} -m comment --comment "DROP: Source Alien Destination Alien"
 	
 	###
 	# The Drops - no logging required
 	###
 	
-	${IPT} -A INPUT -m state --state INVALID -j ${DSTATS} -m comment --comment "Standard flags"
-	${IPT} -A INPUT -i ${PUBIF} -s ${IP} -j ${DSTATS} -m comment --comment "Package on public interface with source local IP"
+	${IPT} -A INPUT -m state --state INVALID -j ${DSTATS} -m comment --comment "DROP: Standard flags"
+	${IPT} -A INPUT -i ${PUBIF} -s ${IP} -j ${DSTATS} -m comment --comment "DROP: Package on public interface with source local IP"
 	
 	#ICMP Rules
-	${IPT} -A INPUT -i ${PUBIF} -p icmp --icmp-type echo-request -m limit --limit 1/s -j ${STATS} -m comment --comment "Allow ICMP Requests - 1 per second"
-	${IPT} -A INPUT -i ${PUBIF} -p icmp --icmp-type echo-reply -m limit --limit 1/s -j ${STATS} -m comment --comment "Allow ICMP Replies - 1 per second"
-	${IPT} -A INPUT -i ${PUBIF} -p icmp -j ${DSTATS} -m comment --comment "Drop ICMP Flood"
+	${IPT} -A INPUT -i ${PUBIF} -p icmp --icmp-type echo-request -m limit --limit 1/s -j ${STATS} -m comment --comment "Allow: ICMP Requests - 1 per second"
+	${IPT} -A INPUT -i ${PUBIF} -p icmp --icmp-type echo-reply -m limit --limit 1/s -j ${STATS} -m comment --comment "Allow: ICMP Replies - 1 per second"
+	${IPT} -A INPUT -i ${PUBIF} -p icmp -j ${DSTATS} -m comment --comment "DROP: ICMP Flood"
 	
 	# ALLOW ONLY ESTABLISHED, RELATED
 	${IPT} -A INPUT -p tcp -i ${PUBIF} -m state --state ESTABLISHED,RELATED -j ${STATS} -m comment --comment "GenStat"
@@ -123,8 +124,8 @@ function _start_firewall() {
 	${IPT} -A INPUT -p tcp ! --syn -m state --state NEW -j ${LOG} -m comment --comment "LOG: Make sure new incoming connections are SYN packets"
 	${IPT} -A INPUT -p tcp --tcp-flags ALL ALL -j ${LOG} -m comment --comment "LOG: Reject malformed xmas packets"
 	${IPT} -A INPUT -p tcp --tcp-flags ALL NONE -j ${LOG} -m comment --comment "LOG: Reject malformed null packets"
-	${IPT} -A INPUT -i ${PUBIF} ! --destination ${IP} -p tcp -j ${DSTATS} -m comment --comment "LOG: TCP Package not for us"
-	${IPT} -A INPUT -i ${PUBIF} ! --destination ${IP} -p udp -j ${DSTATS} -m comment --comment "LOG: UDP Package not for us"
+	${IPT} -A INPUT -i ${PUBIF} ! --destination ${IP} -p tcp -j ${DSTATS} -m comment --comment "DROP: TCP Package not for us"
+	${IPT} -A INPUT -i ${PUBIF} ! --destination ${IP} -p udp -j ${DSTATS} -m comment --comment "DROP: UDP Package not for us"
 	
 	###
 	# The Allows (including statistics)
@@ -141,12 +142,11 @@ function _start_firewall() {
 	###
 	# Log and reject the rest
 	###
-	${IPT} -A INPUT -j ${LOG} -m comment --comment "Log and Reject the rest"
+	${IPT} -A INPUT -j ${LOG} -m comment --comment "LOG: Reject the rest"
 	
 	###
 	# The output chain
 	###
-	${IPT} -A OUTPUT -o lo -j ACCEPT -m comment --comment "Loopback - no need for statistics"
 	${IPT} -A OUTPUT -j ${STATS} -m comment --comment "GenStat"
 }
 
