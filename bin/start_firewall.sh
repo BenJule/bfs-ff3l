@@ -94,8 +94,8 @@ function _start_firewall() {
 	# The Statistics
 	###
 	${IPT} -N ${STATS}
-	${IPT} -A ${STATS} -s ${IP} -j ACCEPT -m comment --comment "${STATS_COMMENT_PREFIX} 3-UPLOAD Source Local Destination Alien"
-	${IPT} -A ${STATS} -d ${IP} -j ACCEPT -m comment --comment "${STATS_COMMENT_PREFIX} 4-DOWNLOAD Source Alien Destination Local"
+	${IPT} -A ${STATS} -s ${IP} -o ${PUBIF} -j ACCEPT -m comment --comment "${STATS_COMMENT_PREFIX} 3-UPLOAD Source Local Destination Alien"
+	${IPT} -A ${STATS} -d ${IP} -i ${PUBIF} -j ACCEPT -m comment --comment "${STATS_COMMENT_PREFIX} 4-DOWNLOAD Source Alien Destination Local"
 	${IPT} -A ${STATS} -j LOG --log-prefix "BFS Stats: " --log-level 4 -m comment --comment "LOG: packages which are not supposed to be here"
 	${IPT} -A ${STATS} -j ${DSTATS} -m comment --comment "DROP: Source Alien Destination Alien"
 	

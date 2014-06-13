@@ -115,7 +115,7 @@ $files = $bfs->getFiles();
 					data-max-y=100
 				>
 					<div class="panel-heading">
-					<h4 class="panel-title">CPU Average (collectd)<small>(stacked / stats for CPU 0+1)</small></h4>
+					<h4 class="panel-title">CPU Average (collectd) <small>(stacked / stats for CPU 0+1)</small></h4>
 					</div>
 					<div class="panel-body"></div>
 				</div>
@@ -175,7 +175,7 @@ $files = $bfs->getFiles();
 					data-url="type=collectd&folder=df-root"
 				>
 					<div class="panel-heading">
-						<h4 class="panel-title">Disk Stats /root (collectd)
+						<h4 class="panel-title">Disk Stats / (collectd)
 							<small>(stacked)</small>
 						</h4>
 					</div>
@@ -215,7 +215,7 @@ $files = $bfs->getFiles();
 					data-type="line"
 				>
 					<div class="panel-heading">
-					<h4 class="panel-title">Disk IOPS (collectd)<small>(stats for /dev/vda)</small></h4>
+					<h4 class="panel-title">Disk IOPS (collectd) <small>(stats for /dev/vda)</small></h4>
 					</div>
 					<div class="panel-body"></div>
 				</div>
