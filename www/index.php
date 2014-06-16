@@ -122,6 +122,26 @@ $files = $bfs->getFiles();
 			</div>
 		</div>
 		<div class="container-fluid col-group">
+			<div class="col-lg-12">
+				<div
+					class="panel panel-default load-highchart"
+					id="collectd-memory"
+					data-source="json"
+					data-ytitle=""
+					data-url="type=collectd&folder=memory"
+					data-legend="disabled"
+					data-stacking="percentage"
+					data-type="areaspline"
+					data-tooltip-convert="B"
+				>
+					<div class="panel-heading">
+					<h4 class="panel-title">Memory <small>(stacked)</small></h4>
+					</div>
+					<div class="panel-body"></div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid col-group">
 			<div class="col-lg-6">
 				<div
 					class="panel panel-default load-highchart"
