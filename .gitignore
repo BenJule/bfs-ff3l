@@ -1,4 +1,4 @@
 *.csv
 *.rrd
-*.local
-bfs.conf
+#*.local
+#bfs.conf
