@@ -142,7 +142,8 @@ function _start_firewall() {
 	###
 	# Log and reject the rest
 	###
-	${IPT} -A INPUT -j ${LOG} -m comment --comment "LOG: Reject the rest"
+	${IPT} -A INPUT -p udp -j ${DSTATS} -m comment --comment "DROP: Rest UDP"
+	${IPT} -A INPUT -j ${LOG} -m comment --comment "LOG: Reject TCP"
 	
 	###
 	# The output chain
