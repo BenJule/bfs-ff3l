@@ -22,7 +22,7 @@ cp /opt/bfs/conf/bfs.conf.example /opt/bfs/conf/bfs.conf
 vi /opt/bfs/conf/bfs.conf #Edit the configuration file
 ```
 * Modify your firewall (and apply it), so that all the rules that require accounting have the comment starting with the same string as the one specified in `bfs.conf` (the variable `STATS_COMMENT_PREFIX`).
-* If you need a firewall script example, you can use `/opt/bfs/bin/start_firewall.sh`
+* If you need a firewall script example, you can use `/opt/bfs/bin/start_firewall.sh` (*recommended*, since it uses the same variables as the `generate_statistics.sh` script).
 * Link the `/opt/bfs/www` folder somewhere in your DocumentRoot folder
 * Test it! `/opt/bfs/bin/generate_statistics.sh`
 * Copy the cronjob (`/opt/bfs/cron.d/bfs_cron`) to `/etc/cron.d/`
