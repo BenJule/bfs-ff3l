@@ -32,6 +32,9 @@ COLLECTD_RRD_PATH='/var/lib/collectd/rrd/vserver01.bitleader.com/'
 # Important! Use this string to identify for which rules the stats script should gather the data.
 STATS_COMMENT_PREFIX='STS' # The comment prefix, by which the stats are generated
 
+# Your SSH port. Default is 22
+SSH_PORT=22
+
 # The name of the chains
 LOG='LOGGING' # The logging chain
 STATS='STATS' # The statistics chain

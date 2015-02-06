@@ -130,7 +130,7 @@ function _start_firewall() {
 	###
 	# The Allows (including statistics)
 	###
-	${IPT} -A INPUT -p tcp --dport ssh -j ${STATS} -m comment --comment "GenStat: SSH"
+	${IPT} -A INPUT -p tcp --dport ${SSH_PORT} -j ${STATS} -m comment --comment "GenStat: SSH"
 	${IPT} -A INPUT -p tcp -m tcp --dport 443 -j ${STATS} -m comment --comment "GenStat: HTTPS"
 	${IPT} -A INPUT -p tcp -m tcp --dport 80 -j ${STATS} -m comment --comment "GenStat: HTTP"
 	

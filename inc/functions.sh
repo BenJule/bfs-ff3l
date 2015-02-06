@@ -48,6 +48,9 @@ function _check_variables() {
         _is_letters "${!i}"
         if [[ "${?}" -eq "1" ]]; then echo "Please use only letters for \$${i}"; exit 1; fi
     done
+
+    #Sets the default SSH Port to 22 if it hasn't been overwritten
+    SSH_PORT=${SSH_PORT=22}
 }
 
 ###
