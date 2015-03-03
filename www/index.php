@@ -109,13 +109,13 @@ $files = $bfs->getFiles();
 					id="collectd-load"
 					data-source="json"
 					data-ytitle=""
-					data-url="type=collectd&folder=cpu-even-average"
+					data-url="type=collectd&folder=<?php echo $bfs->config['collectd_cpu_stats'];?>"
 					data-legend="disabled"
 					data-stacking="percentage"
 					data-max-y=100
 				>
 					<div class="panel-heading">
-					<h4 class="panel-title">CPU Average (collectd) <small>(stacked / stats for CPU 0+1)</small></h4>
+					<h4 class="panel-title">CPU Average (collectd) <small>(stacked / stats for all the CPUs)</small></h4>
 					</div>
 					<div class="panel-body"></div>
 				</div>

@@ -49,6 +49,7 @@ class BitleaderFirewallStatistics {
 		'modal' => null,
 		'enable_collectd' => null,
 		'collectd_rrd_path' => null,
+		'collectd_cpu_stats' => null,
 	);
 
 	/**

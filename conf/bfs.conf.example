@@ -25,6 +25,11 @@ MODAL='modal.tpl'
 ENABLE_COLLECTD='yes'
 COLLECTD_RRD_PATH='/var/lib/collectd/rrd/vserver01.bitleader.com/'
 
+#Workaround for only one CPU and no average data
+#Enter the folder name for the CPU stats
+COLLECTD_CPU_STATS='cpu-even-average'
+#COLLECTD_CPU_STATS='cpu-0'
+
 ###
 # BASH - only variables
 ############################################################################################################
