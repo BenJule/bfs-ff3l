@@ -112,9 +112,8 @@ function _start_firewall() {
 	${IPT} -A INPUT -i ${PUBIF} -p icmp -j ${DSTATS} -m comment --comment "DROP: ICMP Flood"
 	
 	# ALLOW ONLY ESTABLISHED, RELATED
-	${IPT} -A INPUT -p tcp -i ${PUBIF} -m state --state ESTABLISHED,RELATED -j ${STATS} -m comment --comment "GenStat"
-	${IPT} -A INPUT -p udp -i ${PUBIF} -m state --state ESTABLISHED,RELATED -j ${STATS} -m comment --comment "GenStat"
-	
+	${IPT} -A INPUT -m state --state ESTABLISHED,RELATED -j ${STATS} -m comment --comment "GenStat"
+
 	###
 	# General logging
 	###
