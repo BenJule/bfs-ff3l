@@ -31,6 +31,6 @@ nano /opt/bfs-ff3l/conf/bfs-ff3l.conf #Edit the configuration file
 * The first word in the rules comment _after_ `${STATS_COMMENT_PREFIX}` will be used as RRD/CSV file name.
 * The same string is the one shown on the graph for the metric.
 
-Special thanks to https://github.com/tlex for Support his Script
-Patches and/or comments are welcomed!
+* Special thanks to https://github.com/tlex for Support his Script
+* Patches and/or comments are welcomed!
 
