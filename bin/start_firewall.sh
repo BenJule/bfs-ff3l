@@ -55,106 +55,141 @@ function _load_files() {
 }
 
 function _stop_firewall() {
-	echo -n "Stopping firewall"
-	${IPT} -F
-	${IPT} -X
-	${IPT} -t nat -F
-	${IPT} -t nat -X
-	${IPT} -t mangle -F
-	${IPT} -t mangle -X
-	${IPT} -P INPUT ACCEPT
-	${IPT} -P FORWARD ACCEPT
-	${IPT} -P OUTPUT ACCEPT
+	I=${IPT}
+	if [ "$1" = "6" ]; then 
+		I=${IPT6}
+	fi
+	echo -n "Stopping firewall with ${I}"
+	${I} -F
+	${I} -X
+	${I} -t nat -F
+	${I} -t nat -X
+	${I} -t mangle -F
+	${I} -t mangle -X
+	${I} -P INPUT ACCEPT
+	${I} -P FORWARD ACCEPT
+	${I} -P OUTPUT ACCEPT
 	echo " OK"
 }
 
 function _start_firewall() {
-	echo "Starting the firewall"
+	# The IPTABLES binary to use
+	I=${IPT}
+	# Which IP version to use
+	V=4
+
+	#Switch to ipv6
+	if [ "$1" = "6" ]; then 
+		I=${IPT6}
+		V="6"
+	fi
+
+	echo "Starting the firewall with ${I}"
 	
 	###
 	# Loopback
 	###
-	${IPT} -A INPUT -i lo -j ACCEPT
-	${IPT} -A OUTPUT -o lo -j ACCEPT
+	${I} -A INPUT -i lo -j ACCEPT
+	${I} -A OUTPUT -o lo -j ACCEPT
 	
 	###
 	# The Log
 	###
-	${IPT} -N ${LOG}
-	${IPT} -A ${LOG} -m limit --limit 2/min -j LOG --log-prefix "BFS Reject: " --log-level 4 -m comment --comment "Rejected packages are logged"
-	${IPT} -A ${LOG} -j REJECT -m comment --comment "${STATS_COMMENT_PREFIX} 2-REJECT"
+	${I} -N ${LOG}
+	${I} -A ${LOG} -m limit --limit 2/min -j LOG --log-prefix "BFS Reject: " --log-level 4 -m comment --comment "Rejected packages are logged"
+	${I} -A ${LOG} -j REJECT -m comment --comment "${STATS_COMMENT_PREFIX} 2-REJECT"
 	
 	###
 	# Statistics for dropped packets
 	###
-	${IPT} -N ${DSTATS}
-	${IPT} -A ${DSTATS} -j DROP -m comment --comment "${STATS_COMMENT_PREFIX} 1-DROP"
+	${I} -N ${DSTATS}
+	${I} -A ${DSTATS} -j DROP -m comment --comment "${STATS_COMMENT_PREFIX} 1-DROP"
 	
 	###
 	# The Statistics
 	###
-	${IPT} -N ${STATS}
-	${IPT} -A ${STATS} -s ${IP} -o ${PUBIF} -j ACCEPT -m comment --comment "${STATS_COMMENT_PREFIX} 3-UPLOAD Source Local Destination Alien"
-	${IPT} -A ${STATS} -d ${IP} -i ${PUBIF} -j ACCEPT -m comment --comment "${STATS_COMMENT_PREFIX} 4-DOWNLOAD Source Alien Destination Local"
-	${IPT} -A ${STATS} -j LOG --log-prefix "BFS Stats: " --log-level 4 -m comment --comment "LOG: packages which are not supposed to be here"
-	${IPT} -A ${STATS} -j ${DSTATS} -m comment --comment "DROP: Source Alien Destination Alien"
+	${I} -N ${STATS}
+
+	#TODO: Get the ipv6 ip addresses as well
+	if [ "${V}" = "4" ]; then
+		${I} -A ${STATS} -s ${IP} -o ${PUBIF} -j ACCEPT -m comment --comment "${STATS_COMMENT_PREFIX} 3-UPLOAD Source Local Destination Alien"
+		${I} -A ${STATS} -d ${IP} -i ${PUBIF} -j ACCEPT -m comment --comment "${STATS_COMMENT_PREFIX} 4-DOWNLOAD Source Alien Destination Local"
+	fi
+
+	${I} -A ${STATS} -j LOG --log-prefix "BFS Stats: " --log-level 4 -m comment --comment "LOG: packages which are not supposed to be here"
+	${I} -A ${STATS} -j ${DSTATS} -m comment --comment "DROP: Source Alien Destination Alien"
 	
 	###
 	# The Drops - no logging required
 	###
 	
-	${IPT} -A INPUT -m state --state INVALID -j ${DSTATS} -m comment --comment "DROP: Standard flags"
-	${IPT} -A INPUT -i ${PUBIF} -s ${IP} -j ${DSTATS} -m comment --comment "DROP: Package on public interface with source local IP"
+	${I} -A INPUT -m state --state INVALID -j ${DSTATS} -m comment --comment "DROP: Standard flags"
+
+	#TODO: Get the ipv6 ip addresses as well
+	if [ "${V}" = "4" ]; then
+		${I} -A INPUT -i ${PUBIF} -s ${IP} -j ${DSTATS} -m comment --comment "DROP: Package on public interface with source local IP"
+	fi
 	
-	#ICMP Rules
-	${IPT} -A INPUT -i ${PUBIF} -p icmp --icmp-type echo-request -m limit --limit 1/s -j ${STATS} -m comment --comment "Allow: ICMP Requests - 1 per second"
-	${IPT} -A INPUT -i ${PUBIF} -p icmp --icmp-type echo-reply -m limit --limit 1/s -j ${STATS} -m comment --comment "Allow: ICMP Replies - 1 per second"
-	${IPT} -A INPUT -i ${PUBIF} -p icmp -j ${DSTATS} -m comment --comment "DROP: ICMP Flood"
+	# ICMP Rules
+	# Different for IPv4 and IPv6 because of reasons
+	if [ "${V}" = "4" ]; then
+		${I} -A INPUT -p icmp --icmp-type echo-request -m limit --limit 1/s -j ${STATS} -m comment --comment "Allow: ICMP Requests - 1 per second"
+		${I} -A INPUT -p icmp --icmp-type echo-reply -m limit --limit 1/s -j ${STATS} -m comment --comment "Allow: ICMP Replies - 1 per second"
+		${I} -A INPUT -p icmp -j ${DSTATS} -m comment --comment "DROP: ICMP Flood"
+	else
+		${I} -A INPUT -p icmpv6 -m limit --limit 50/s -j ${STATS} -m comment --comment "Allow: ICMP - 50 per second"
+		${I} -A INPUT -p icmpv6 -j ${DSTATS} -m comment --comment "DROP: ICMP Flood"
+	fi
+
 	
 	# ALLOW ONLY ESTABLISHED, RELATED
-	${IPT} -A INPUT -m state --state ESTABLISHED,RELATED -j ${STATS} -m comment --comment "GenStat"
+	${I} -A INPUT -m state --state ESTABLISHED,RELATED -j ${STATS} -m comment --comment "GenStat"
 
 	###
 	# General logging
 	###
-	${IPT} -A INPUT -p tcp --tcp-flags ALL ACK,RST,SYN,FIN -j ${LOG} -m comment --comment "LOG: Reject invalid packets"
-	${IPT} -A INPUT -p tcp --tcp-flags SYN,FIN SYN,FIN -j ${LOG} -m comment --comment "LOG: Reject invalid packets"
-	${IPT} -A INPUT -p tcp --tcp-flags SYN,RST SYN,RST -j ${LOG} -m comment --comment "LOG: Reject invalid packets"
-	${IPT} -A INPUT -p tcp ! --syn -m state --state NEW -j ${LOG} -m comment --comment "LOG: Make sure new incoming connections are SYN packets"
-	${IPT} -A INPUT -p tcp --tcp-flags ALL ALL -j ${LOG} -m comment --comment "LOG: Reject malformed xmas packets"
-	${IPT} -A INPUT -p tcp --tcp-flags ALL NONE -j ${LOG} -m comment --comment "LOG: Reject malformed null packets"
-	${IPT} -A INPUT -i ${PUBIF} ! --destination ${IP} -p tcp -j ${DSTATS} -m comment --comment "DROP: TCP Package not for us"
-	${IPT} -A INPUT -i ${PUBIF} ! --destination ${IP} -p udp -j ${DSTATS} -m comment --comment "DROP: UDP Package not for us"
+	${I} -A INPUT -p tcp --tcp-flags ALL ACK,RST,SYN,FIN -j ${LOG} -m comment --comment "LOG: Reject invalid packets"
+	${I} -A INPUT -p tcp --tcp-flags SYN,FIN SYN,FIN -j ${LOG} -m comment --comment "LOG: Reject invalid packets"
+	${I} -A INPUT -p tcp --tcp-flags SYN,RST SYN,RST -j ${LOG} -m comment --comment "LOG: Reject invalid packets"
+	${I} -A INPUT -p tcp ! --syn -m state --state NEW -j ${LOG} -m comment --comment "LOG: Make sure new incoming connections are SYN packets"
+	${I} -A INPUT -p tcp --tcp-flags ALL ALL -j ${LOG} -m comment --comment "LOG: Reject malformed xmas packets"
+	${I} -A INPUT -p tcp --tcp-flags ALL NONE -j ${LOG} -m comment --comment "LOG: Reject malformed null packets"
+	#TODO: Get the ipv6 ip addresses as well
+	if [ "${V}" = "4" ]; then
+		${I} -A INPUT -i ${PUBIF} ! --destination ${IP} -p tcp -j ${DSTATS} -m comment --comment "DROP: TCP Package not for us"
+		${I} -A INPUT -i ${PUBIF} ! --destination ${IP} -p udp -j ${DSTATS} -m comment --comment "DROP: UDP Package not for us"
+	fi
 	
 	###
 	# The Allows (including statistics)
 	###
-	${IPT} -A INPUT -p tcp --dport ${SSH_PORT} -j ${STATS} -m comment --comment "GenStat: SSH"
-	${IPT} -A INPUT -p tcp -m tcp --dport 443 -j ${STATS} -m comment --comment "GenStat: HTTPS"
-	${IPT} -A INPUT -p tcp -m tcp --dport 80 -j ${STATS} -m comment --comment "GenStat: HTTP"
+	${I} -A INPUT -p tcp --dport ${SSH_PORT} -j ${STATS} -m comment --comment "GenStat: SSH"
+	${I} -A INPUT -p tcp -m tcp --dport 443 -j ${STATS} -m comment --comment "GenStat: HTTPS"
+	${I} -A INPUT -p tcp -m tcp --dport 80 -j ${STATS} -m comment --comment "GenStat: HTTP"
 	
 	###
 	# Add your rules in the file here
 	###
-	[[ -f "${BASEFOLDER}/conf/bfs.firewall.local" ]] && ( . "${BASEFOLDER}/conf/bfs.firewall.local" )
+	[[ -f "${BASEFOLDER}/conf/bfs.firewall.local.${V}" ]] && ( . "${BASEFOLDER}/conf/bfs.firewall.local.${V}" )
 	
 	###
 	# Log and reject the rest
 	###
-	${IPT} -A INPUT -p udp -j ${DSTATS} -m comment --comment "DROP: Rest UDP"
-	${IPT} -A INPUT -j ${LOG} -m comment --comment "LOG: Reject TCP"
+	${I} -A INPUT -p udp -j ${DSTATS} -m comment --comment "DROP: Rest UDP"
+	${I} -A INPUT -j ${LOG} -m comment --comment "LOG: Reject TCP"
 	
 	###
 	# The output chain
 	###
-	${IPT} -A OUTPUT -j ${STATS} -m comment --comment "GenStat"
+	${I} -A OUTPUT -j ${STATS} -m comment --comment "GenStat"
 }
 
 function _main() {
-    _stop_firewall
-    _start_firewall
+    _stop_firewall 4
+	_stop_firewall 6
+    _start_firewall 4
+	_start_firewall 6
 
 }
 _load_files
 _main "$@"
-
