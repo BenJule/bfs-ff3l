@@ -1,0 +1,124 @@
+# Use ${DSTATS} for Drop and Generate Statistics
+# Use ${STATS} for Allow and Generate Statistics
+
+# services
+${IPT} -N services
+${IPT} -A INPUT -m state --state NEW -m limit --limit 10/second -j services
+
+# echo
+${IPT} -A services -p udp --dport 7 -j ${STATS}
+${IPT} -A services -p tcp --dport 7 -j ${STATS}
+
+# ftp
+${IPT} -A services -p tcp --dport 21 -j ${STATS}
+
+# ssh
+${IPT} -A services -p tcp --dport 22 -j ${STATS}
+
+# smtp
+${IPT} -A services -p udp --dport 25 -j ${STATS}
+${IPT} -A services -p tcp --dport 25 -j ${STATS}
+
+# domain
+${IPT} -A services -p udp --dport 53 -j ${STATS}
+${IPT} -A services -p tcp --dport 53 -j ${STATS}
+
+# dhcp
+${IPT} -A services -p udp --dport 67 -j ${STATS}
+
+# http
+${IPT} -A services -p tcp --dport 80 -j ${STATS}
+
+# pop
+${IPT} -A services -p tcp --dport 110 -j ${STATS}
+
+# nntp
+${IPT} -A services -p tcp --dport 119 -j ${STATS}
+
+# nntp (incoming feeds)
+${IPT} -A services -p tcp --dport 120 -j ${STATS}
+
+# nntp (outoging feeds)
+${IPT} -A services -p tcp --dport 121 -j ${STATS}
+
+# ntp
+${IPT} -A services -p udp --dport 123 -j ${STATS}
+
+# imap
+${IPT} -A services -p tcp --dport 143 -j ${STATS}
+
+# bgp
+${IPT} -A services -p tcp --dport 179 -j ${STATS}
+
+# https
+${IPT} -A services -p tcp --dport 443 -j ${STATS}
+
+# smtps
+${IPT} -A services -p tcp --dport 465 -j ${STATS}
+
+# submission
+${IPT} -A services -p udp --dport 587 -j ${STATS}
+${IPT} -A services -p tcp --dport 587 -j ${STATS}
+
+# tincd
+${IPT} -A services -p udp --dport 656 -j ${STATS}
+${IPT} -A services -p tcp --dport 656 -j ${STATS}
+
+# imaps
+${IPT} -A services -p tcp --dport 993 -j ${STATS}
+
+# pop3s
+${IPT} -A services -p tcp --dport 995 -j ${STATS}
+
+# quassel
+${IPT} -A services -p tcp --dport 4242 -j ${STATS}
+
+# jabber
+${IPT} -A services -p tcp --dport 5222 -j ${STATS}
+
+# nrpe
+${IPT} -A services -p tcp --dport 5666 -j ${STATS}
+
+# zapp script info page server
+${IPT} -A services -p tcp --dport 8090 -j ${STATS}
+
+# fastd
+${IPT} -A services -p udp --dport 10000 -j ${STATS}
+
+# Drop and Log everything else
+${IPT} -A services -j ${DSTATS}
+
+###############################################################################
+# FORWARD
+
+# Limit the number of forwarded connections per IP address
+${IPT} -A FORWARD -m state --state NEW -m connlimit --connlimit-above 200 -j REJECT
+
+# Allow established connections without limitation
+${IPT} -A FORWARD -m state --state ESTABLISHED,RELATED -j ${STATS}
+
+# Do not allow forwarding of DHCP requests. We want clients to use our DHCP server.
+${IPT} -A FORWARD -i br-ff3l -p udp --dport 67 -j REJECT
+
+# Mesh-VPN
+${IPT} -A FORWARD -i br-ff3l -o icvpn -j ${STATS}
+${IPT} -A FORWARD -i br-ff3l -o tun0 -j ${STATS}
+${IPT} -A FORWARD -i br-ff3l -o eth0 -p tcp --dport 587 -m connlimit --connlimit-upto 5 -j ${STATS}
+
+# IC-VPN
+${IPT} -A FORWARD -i icvpn -o br-ff3l -j ${STATS}
+
+# Reject all other traffic
+${IPT} -A FORWARD -j ${DSTATS}
+
+###############################################################################
+# NAT
+${IPT} -t nat -A POSTROUTING -o tun0 -j MASQUERADE
+${IPT} -t nat -A POSTROUTING -o tun1 -j MASQUERADE 
+${IPT} -t nat -A POSTROUTING -o tun2 -j MASQUERADE 
+${IPT} -t nat -A POSTROUTING -o tun3 -j MASQUERADE 
+${IPT} -t nat -A POSTROUTING -o eth0 -p tcp --dport 587 -j MASQUERADE
+
+###############################################################################
+# MANGLE
+${IPT} -t mangle -A PREROUTING -i br-ff3l -j MARK --set-xmark 0x1/0xffffffff
